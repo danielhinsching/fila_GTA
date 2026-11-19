@@ -49,6 +49,9 @@ alter table fila_tickets add column if not exists device text;
 alter table fila_config add column if not exists fast_every int not null default 2;   -- a cada N normais, 1 fast-pass
 create table if not exists fila_station_run (station int primary key, run int not null default 0);   -- normais que começaram desde o último fast-pass
 alter table fila_station_run enable row level security;
+-- Uma única sessão de staff por estação: quem abre primeiro segura; outro aparelho só entra após 40 s sem sinal ou depois do "Sair".
+create table if not exists fila_staff_session (station int primary key, sid text not null, seen timestamptz not null default now());
+alter table fila_staff_session enable row level security;
 create index if not exists fila_tickets_station_status on fila_tickets (station, status);
 create index if not exists fila_tickets_device on fila_tickets (device) where status in ('waiting','playing');
 
@@ -71,7 +74,7 @@ drop policy if exists fila_config_read on fila_config;
 create policy fila_config_read on fila_config for select using (true);
 drop policy if exists fila_pulse_read on fila_pulse;
 create policy fila_pulse_read on fila_pulse for select using (true);
-revoke all on fila_secrets, fila_pin_guard, fila_tickets, fila_station_run from anon, authenticated;
+revoke all on fila_secrets, fila_pin_guard, fila_tickets, fila_station_run, fila_staff_session from anon, authenticated;
 revoke insert, update, delete on fila_config, fila_pulse from anon, authenticated;
 
 -- avisa as telas abertas que algo mudou (sem expor dados)
@@ -258,24 +261,42 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- ---------------------------------------------------------------- staff
-create or replace function fila_staff_view(p_station int, p_pin text) returns jsonb
+-- PIN + sessão única: devolve ok | bad | locked | ocupado | sessao
+create or replace function fila_staff_gate(p_station int, p_pin text, p_session text) returns text
+language plpgsql security definer set search_path = public as $$
+declare st text; cur fila_staff_session;
+begin
+  st := fila_pin_state(p_station, p_pin);
+  if st <> 'ok' then return st; end if;
+  if p_session is null or length(p_session) < 8 then return 'sessao'; end if;
+  select * into cur from fila_staff_session where station = p_station for update;
+  if cur.station is not null and cur.sid <> p_session and cur.seen > now() - interval '40 seconds' then return 'ocupado'; end if;
+  insert into fila_staff_session (station, sid, seen) values (p_station, p_session, now())
+    on conflict (station) do update set sid = excluded.sid, seen = excluded.seen;
+  return 'ok';
+end $$;
+
+drop function if exists fila_staff_view(int, text);
+drop function if exists fila_staff_do(text, int, text, uuid, text, boolean);
+create or replace function fila_staff_view(p_station int, p_pin text, p_session text default null) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare st text;
 begin
   if p_station not between 1 and 5 then return jsonb_build_object('ok', false, 'error', 'estacao'); end if;
-  st := fila_pin_state(p_station, p_pin);
+  st := fila_staff_gate(p_station, p_pin, p_session);
   if st <> 'ok' then return jsonb_build_object('ok', false, 'error', st); end if;
   return jsonb_build_object('ok', true, 'now', now(), 'config', fila_config_json(), 'station', fila_station_json(p_station, true));
 end $$;
 
 create or replace function fila_staff_do(p_action text, p_station int, p_pin text,
-                                         p_ticket uuid default null, p_name text default null, p_fast boolean default false)
+                                         p_ticket uuid default null, p_name text default null, p_fast boolean default false, p_session text default null)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare st text; t fila_tickets; cfg fila_config; n int; w int; rk int;
 begin
   if p_station not between 1 and 5 then return jsonb_build_object('ok', false, 'error', 'estacao'); end if;
-  st := fila_pin_state(p_station, p_pin);
+  st := fila_staff_gate(p_station, p_pin, p_session);
   if st <> 'ok' then return jsonb_build_object('ok', false, 'error', st); end if;
+  if p_action = 'logout' then delete from fila_staff_session where station = p_station and sid = p_session; return jsonb_build_object('ok', true); end if;
   perform pg_advisory_xact_lock(777);
   select * into cfg from fila_config;
 
@@ -331,7 +352,7 @@ do $$ declare f record; begin          -- só as funções fila_*; não toca em 
   end loop;
 end $$;
 grant execute on function fila_now(), fila_tick(), fila_me(uuid), fila_join(text,text), fila_board(),
-  fila_staff_view(int,text), fila_staff_do(text,int,text,uuid,text,boolean) to anon, authenticated;
+  fila_staff_view(int,text,text), fila_staff_do(text,int,text,uuid,text,boolean,text) to anon, authenticated;
 
 do $$ begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then

@@ -110,7 +110,7 @@
     await FILA.init();
     const as = new URLSearchParams(location.search).get('as');       // demo: ?mock=1&as=Julia
     if (FILA.MOCK && as && !myId) myId = FILA.demoFind(as);
-    FILA.watch(async () => { if (!myId) return; try { R = await FILA.me(myId); offline = false; } catch (e) { offline = true; } render(); }, { jitter: 1500, fallbackMs: 6000 });
+    FILA.watch(async () => { if (!myId) return; try { R = await FILA.me(myId); offline = false; } catch (e) { offline = true; } render(); }, { jitter: 1500, fallbackMs: 5000, realtime: false });
     if (myId) { /* aguarda a primeira resposta */ } else joinView();
     setInterval(render, 250);
     // se nenhuma tela de staff/telão estiver aberta, o relógio da fila ainda precisa avançar

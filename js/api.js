@@ -20,9 +20,15 @@ const FILA = (() => {
     catch (e) { return 'tmp-' + Math.random().toString(36).slice(2); }
   };
 
+  const staffSid = () => {
+    try { let d = localStorage.getItem('fila_staff_sid'); if (!d) { d = 's' + crypto.randomUUID(); localStorage.setItem('fila_staff_sid', d); } return d; }
+    catch (e) { return 'tmp-staff-' + Math.random().toString(36).slice(2, 12); }
+  };
+  const mGate = (st, sid) => { const c = M.sess[st]; if (c && c.sid !== sid && Date.now() - c.seen < 40000) return false; M.sess[st] = { sid, seen: Date.now() }; return true; };
+
   // ---------------------------------------------------------------- demo (mesmas regras do SQL)
   const NST = 5, STS = [1, 2, 3, 4, 5];
-  const M = { t: [], q: 0, run: {} };
+  const M = { t: [], q: 0, run: {}, sess: {} };
   // Mesma regra do SQL: a cada cfg.fast_every normais começa 1 fast-pass; sem normais, os fast seguem em sequência.
   const mWaiting = s => {
     const w = M.t.filter(t => t.station === s && t.status === 'waiting');
@@ -115,16 +121,20 @@ const FILA = (() => {
         const t = { id: 'm' + Math.random().toString(36).slice(2, 9), name: name.slice(0, 30), station: best, status: 'waiting', fast: false, fast_at: null, jumped_from: null, extra_min: 0, queue_seq: ++M.q, starts_at: null, ends_at: null, device: d }; M.t.push(t); mTick(); return mMe(t.id); }
       return sync(await rpc('fila_join', { p_name: name, p_device: device() })); },
     async board() { return sync(MOCK ? { now: mIso(Date.now()), config: cfg, stations: STS.map(s => mStation(s, false)) } : await rpc('fila_board')); },
-    async staffView(station, pin) { return MOCK ? (mTick(), { ok: true, now: mIso(Date.now()), config: cfg, station: mStation(station, true) }) : sync(await rpc('fila_staff_view', { p_station: station, p_pin: pin })); },
-    async staffDo(action, station, pin, o = {}) { return MOCK ? mDo(action, station, o) : rpc('fila_staff_do', { p_action: action, p_station: station, p_pin: pin, p_ticket: o.ticket || null, p_name: o.name || null, p_fast: !!o.fast }); },
+    async staffView(station, pin) { return MOCK ? (!mGate(station, staffSid()) ? { ok: false, error: 'ocupado' } : (mTick(), { ok: true, now: mIso(Date.now()), config: cfg, station: mStation(station, true) })) : sync(await rpc('fila_staff_view', { p_station: station, p_pin: pin, p_session: staffSid() })); },
+    async staffDo(action, station, pin, o = {}) { if (MOCK) { if (!mGate(station, staffSid())) return { ok: false, error: 'ocupado' }; if (action === 'logout') { delete M.sess[station]; return { ok: true }; } return mDo(action, station, o); } return rpc('fila_staff_do', { p_action: action, p_station: station, p_pin: pin, p_ticket: o.ticket || null, p_name: o.name || null, p_fast: !!o.fast, p_session: staffSid() }); },
     tick() { if (MOCK) mTick(); else rpc('fila_tick').catch(() => {}); },
     // Chama fn agora, a cada mudança (realtime por pulso) e como rede de segurança a cada fallbackMs.
-    watch(fn, { jitter = 300, fallbackMs = 8000 } = {}) {
-      let t = null; const run = () => { clearTimeout(t); t = setTimeout(() => Promise.resolve(fn()).catch(() => {}), Math.random() * jitter); };
-      run(); setInterval(() => Promise.resolve(fn()).catch(() => {}), fallbackMs);
+    // Chama fn agora, a cada mudança (realtime por pulso, se realtime=true) e a cada fallbackMs.
+    // Pulsos em rajada são agrupados: no máximo 1 consulta por segundo por tela.
+    watch(fn, { jitter = 300, fallbackMs = 8000, realtime = true } = {}) {
+      let t = null, lastRun = 0;
+      const go = () => { lastRun = Date.now(); Promise.resolve(fn()).catch(() => {}); };
+      const run = () => { if (t) return; const wait = Math.max(Math.random() * jitter, 1000 - (Date.now() - lastRun)); t = setTimeout(() => { t = null; go(); }, Math.max(0, wait)); };
+      run(); setInterval(() => { if (!document.hidden) go(); }, fallbackMs + Math.random() * 1500);
       document.addEventListener('visibilitychange', () => { if (!document.hidden) run(); });
       if (MOCK) demoCbs.push(run);
-      else sb.channel('pulse-' + Math.random().toString(36).slice(2)).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'fila_pulse' }, run).subscribe();
+      else if (realtime) sb.channel('pulse-' + Math.random().toString(36).slice(2)).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'fila_pulse' }, run).subscribe();
     },
   };
   return api;

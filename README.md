@@ -26,7 +26,7 @@ supabase/schema.sql   banco (v2, seguro)
 ## Segurança
 
 As tabelas são privadas (RLS sem acesso anônimo). O navegador só chama funções `fila_*`
-(`security definer`). O staff usa PIN por estação (5 erros = bloqueio de 60 s).
+(`security definer`). O staff usa PIN por estação (5 erros = bloqueio de 60 s) e só **um aparelho por vez** pode abrir cada estação (outro só entra após "Sair" ou 40 s sem sinal).
 
 ## Publicar
 

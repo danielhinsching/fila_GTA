@@ -1,6 +1,6 @@
 // Painel do staff: uma estação por celular/tablet, protegida por PIN.
 (() => {
-  const app = $('#app'), ERR = { bad: 'PIN incorreto', locked: 'Muitas tentativas. Aguarde 1 minuto.', ticket: 'Pessoa não encontrada (a fila mudou).', ninguem_jogando: 'Ninguém está jogando agora.', nome: 'Informe o nome.', estacao: 'Estação inválida.' };
+  const app = $('#app'), ERR = { bad: 'PIN incorreto', locked: 'Muitas tentativas. Aguarde 1 minuto.', ticket: 'Pessoa não encontrada (a fila mudou).', ninguem_jogando: 'Ninguém está jogando agora.', nome: 'Informe o nome.', estacao: 'Estação inválida.', ocupado: 'Esta estação já está aberta em outro aparelho. Se foi engano, feche lá (Sair) ou aguarde 40 segundos.', sessao: 'Sessão inválida. Recarregue a página.' };
   let S = null, PIN = '', authed = false, V = null, last = '', fired = {};
   try { S = +localStorage.getItem('fila_staff_st') || null; PIN = localStorage.getItem('fila_staff_pin') || ''; } catch (e) {}
   const qs = new URLSearchParams(location.search); if (qs.get('st')) { S = +qs.get('st'); PIN = qs.get('pin') || PIN; }
@@ -22,7 +22,7 @@
     try { localStorage.setItem('fila_staff_st', S); localStorage.setItem('fila_staff_pin', PIN); } catch (e) {}
     authed = true; V = r.station; ALERT.unlock(); last = ''; render();
   }
-  function logout() { authed = false; PIN = ''; try { localStorage.removeItem('fila_staff_pin'); } catch (e) {} loginView(); }
+  function logout() { if (authed) FILA.staffDo('logout', S, PIN).catch(() => {}); authed = false; PIN = ''; try { localStorage.removeItem('fila_staff_pin'); } catch (e) {} loginView(); }
   async function refresh() {
     if (!authed) return;
     const r = await FILA.staffView(S, PIN);
@@ -30,7 +30,7 @@
     V = r.station; render();
   }
   async function act(action, o, okMsg) {
-    try { const r = await FILA.staffDo(action, S, PIN, o); if (!r.ok) toast(ERR[r.error] || 'Não foi possível', 'bad'); else if (okMsg) toast(okMsg, 'gold'); }
+    try { const r = await FILA.staffDo(action, S, PIN, o); if (!r.ok && r.error === 'ocupado') { authed = false; return loginView(ERR.ocupado); } if (!r.ok) toast(ERR[r.error] || 'Não foi possível', 'bad'); else if (okMsg) toast(okMsg, 'gold'); }
     catch (e) { toast('Sem conexão. Tente de novo.', 'bad'); }
     refresh();
   }
