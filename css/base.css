@@ -5,7 +5,7 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font-family:'Pricedown',Arial,sans-serif;letter-spacing:1.5px;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;min-height:100dvh;background:linear-gradient(rgba(18,4,31,.5),rgba(18,4,31,.86)),url(../assets/bg.jpg) center top/cover fixed}
+body{min-height:100vh;min-height:100dvh;background:linear-gradient(rgba(18,4,31,.5),rgba(18,4,31,.86)),url(../assets/bg_port.jpg) center top/cover fixed}
 button,input{font-family:inherit;letter-spacing:inherit}
 h1,h2,h3,p{margin:0;font-weight:400}
 .wrap{max-width:560px;margin:0 auto;padding:calc(14px + var(--sat)) 16px calc(40px + var(--sab))}

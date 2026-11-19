@@ -1,7 +1,7 @@
 /* Telão: palco 16:9 (ou 9:16 em tela vertical) escalado para caber */
 html,body{overflow:hidden;height:100%;background:#06010d}
 body{background:#06010d}
-#stage{position:absolute;left:0;top:0;transform-origin:0 0;background:linear-gradient(rgba(18,4,31,.5),rgba(18,4,31,.86)),url(../assets/bg.jpg) center/cover;padding:34px 56px;letter-spacing:2.5px;overflow:hidden}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;background:linear-gradient(rgba(18,4,31,.5),rgba(18,4,31,.86)),url(../assets/bg_land.jpg) center/cover;padding:34px 56px;letter-spacing:2.5px;overflow:hidden}
 .land{width:1920px;height:1080px}.port{width:1080px;height:1920px;padding:40px 36px}
 .top{display:flex;align-items:center;gap:30px;height:150px}.top img{height:150px;filter:drop-shadow(0 0 16px rgba(255,46,154,.6))}
 .top .mid{flex:1;text-align:center}.top .big{font-size:96px;line-height:1;color:#FFE14D;text-shadow:-5px -5px 0 #12041F,5px -5px 0 #12041F,-5px 5px 0 #12041F,5px 5px 0 #12041F,0 12px 0 #FF2E9A}
@@ -30,3 +30,5 @@ body{background:#06010d}
 .cw span{font-size:44px;color:#ececec;margin-top:10px;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes wfade{from{opacity:0}to{opacity:1}}@keyframes wslam{0%{transform:scale(3);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes pulse{50%{opacity:.5}}@keyframes flash{50%{filter:brightness(1.4)}}
+
+.port{background-image:linear-gradient(rgba(18,4,31,.5),rgba(18,4,31,.86)),url(../assets/bg_port.jpg)!important}

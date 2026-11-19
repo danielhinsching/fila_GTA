@@ -1,10 +1,10 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>QR · Fila do GTA VI</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="css/base.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="js/vendor/qrcode.js"></script>
 <style>body{display:flex;justify-content:center}.p{width:min(100vw,720px);padding:24px;text-align:center}
-.qrbox{background:#fff;padding:22px;display:inline-block;border:6px solid #ff4fc3;box-shadow:10px 10px 0 rgba(0,0,0,.6)}
-.logo{height:190px}.url{font-size:20px;color:#ff8fd6;margin-top:14px;word-break:break-all}@media print{.url{display:none}}</style></head>
+.qrbox{background:#fff;padding:14px;display:inline-block;border:6px solid #ff4fc3;box-shadow:10px 10px 0 rgba(0,0,0,.6)}
+.logo{height:190px;image-rendering:auto}@media print{body{background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}.url{font-size:20px;color:#ff8fd6;margin-top:14px;word-break:break-all}@media print{.url{display:none}}</style></head>
 <body><div class="p"><img class="logo" src="assets/logo.png" alt="">
 <div class="ttl" style="font-size:54px;margin:10px 0 4px">ENTRE NA FILA DO GTA VI</div>
 <div class="sub" style="font-size:26px;margin-bottom:22px">Aponte a câmera do celular e deixe a tela aberta</div>
@@ -12,5 +12,8 @@
 <script>
 const u = new URLSearchParams(location.search).get('u') || location.href.replace(/qr\.html.*$/, '');
 document.getElementById('u').textContent = u;
-new QRCode(document.getElementById('qr'), { text: u, width: 420, height: 420, correctLevel: QRCode.CorrectLevel.M });
+const qr = qrcode(0, 'M'); qr.addData(u); qr.make();
+const n = qr.getModuleCount(); let d = '';
+for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c + 4} ${r + 4}h1v1h-1z`;
+document.getElementById('qr').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n + 8} ${n + 8}" width="420" height="420" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#12041F"/></svg>`;
 </script></body></html>
