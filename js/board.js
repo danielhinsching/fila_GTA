@@ -44,7 +44,7 @@
   }
   (async () => {
     await FILA.init();
-    FILA.watch(async () => { B = await FILA.board(); render(); }, { jitter: 200, fallbackMs: 5000 });
+    FILA.watch(async () => { try { B = await FILA.board(); render(); } catch (e) { console.warn(e); if (!B) cols.innerHTML = '<div style="grid-column:1/-1;font-size:44px;text-align:center;padding-top:300px;color:#ff8fd6">CONECTANDO…<br><small style="font-size:28px">' + String(e.message || e).slice(0, 120) + '</small></div>'; } }, { jitter: 200, fallbackMs: 5000 });
     setInterval(render, 500); setInterval(FILA.tick, 3000);
   })();
 })();
