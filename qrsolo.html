@@ -1,0 +1,6 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>QR · Fila do GTA VI</title><meta name="viewport" content="width=device-width,initial-scale=1"><script src="js/vendor/qrcode.js"></script>
+<style>@page{size:A4;margin:0}*{box-sizing:border-box}html,body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pg{width:210mm;height:297mm;margin:auto;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10mm;padding:14mm}
+.pg svg{width:180mm;height:180mm;display:block}.u{font:700 9mm system-ui,Arial,sans-serif;color:#12041F}</style></head><body><div class="pg"><div id="q"></div><div class="u">filagta.vercel.app</div></div>
+<script>const U='https://filagta.vercel.app',q=qrcode(0,'M');q.addData(U);q.make();const n=q.getModuleCount();let d='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+=`M${c+2} ${r+2}h1v1h-1z`;
+document.getElementById('q').innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n+4} ${n+4}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;</script></body></html>
