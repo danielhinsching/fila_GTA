@@ -12,7 +12,7 @@
     app.innerHTML = `<section class="box hero"><h3>ENTRE NA FILA DO GTA VI</h3>
       <input id="nm" type="text" maxlength="30" placeholder="SEU NOME" autocomplete="given-name" autocapitalize="words" enterkeyhint="go">
       <button id="go" class="btn y block mt">ENTRAR NA FILA</button><div class="err" id="err" role="alert"></div>
-      <div class="rules"><div><b>1</b>Você entra em uma das 4 filas, escolhida pelo sistema.</div>
+      <div class="rules"><div><b>1</b>Você entra em uma das 5 filas, escolhida pelo sistema.</div>
         <div><b>2</b>Cada jogador tem ${FILA.cfg.game_min} minutos no console.</div>
         <div><b>3</b>Deixe esta tela aberta: avisamos quando for a sua vez.</div></div></section>`;
     const go = async () => {

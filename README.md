@@ -1,6 +1,6 @@
 # Fila do GTA VI · Noite de Jogos Vice City
 
-App da fila das 4 estações: HTML/CSS/JS puro (Vercel) + Supabase (Postgres + Realtime).
+App da fila das 5 estações: HTML/CSS/JS puro (Vercel) + Supabase (Postgres + Realtime).
 
 ## Telas
 
@@ -33,7 +33,7 @@ As tabelas são privadas (RLS sem acesso anônimo). O navegador só chama funç�
 1. Supabase → SQL Editor → rodar `supabase/schema.sql` (pode rodar mais de uma vez).
 2. Definir os PINs:
    ```sql
-   insert into fila_secrets values (1,'XXXX'),(2,'XXXX'),(3,'XXXX'),(4,'XXXX')
+   insert into fila_secrets values (1,'XXXX'),(2,'XXXX'),(3,'XXXX'),(4,'XXXX'),(5,'XXXX')
    on conflict (station) do update set pin = excluded.pin;
    ```
 3. `js/config.js` com a URL e a chave publishable do projeto.

@@ -8,7 +8,7 @@
   function loginView(err) {
     last = '';
     app.innerHTML = `<div class="wrap" style="padding-top:30px"><p class="ttl">PAINEL DO STAFF</p><section class="box"><h3>QUAL ESTAÇÃO?</h3>
-      <div class="row">${[1, 2, 3, 4].map(n => `<button class="btn grow ${n === S ? 'y' : 'd'}" data-st="${n}">#${n}</button>`).join('')}</div>
+      <div class="row">${[1, 2, 3, 4, 5].map(n => `<button class="btn grow ${n === S ? 'y' : 'd'}" data-st="${n}">#${n}</button>`).join('')}</div>
       <h3 class="mt">PIN DA ESTAÇÃO</h3><input id="pin" type="tel" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" value="${esc(PIN)}">
       <button id="in" class="btn y block mt">ENTRAR</button><div class="err" role="alert">${esc(err || '')}</div></section></div>`;
     $$('[data-st]').forEach(b => b.onclick = () => { S = +b.dataset.st; PIN = $('#pin').value; loginView(); });

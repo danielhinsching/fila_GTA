@@ -21,6 +21,7 @@ const FILA = (() => {
   };
 
   // ---------------------------------------------------------------- demo (mesmas regras do SQL)
+  const NST = 5, STS = [1, 2, 3, 4, 5];
   const M = { t: [], q: 0 };
   const mOrder = (a, b) => (b.fast - a.fast) || (ms(a.fast_at) - ms(b.fast_at)) || (a.queue_seq - b.queue_seq);
   const norm = x => String(x || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');
@@ -35,7 +36,8 @@ const FILA = (() => {
       play('Marcos', 1, 14.6, 10), wait('Julia', 1), fast('Rafa', 1, 4), wait('Bianca', 1), wait('Thiago', 1), wait('Paulo', 1),
       play('Camila', 2, 16), wait('Lucas', 2), wait('Fernanda', 2), wait('Diego', 2),
       play('Renato', 3, 19.2), wait('Amanda', 3), wait('Gabriel', 3), fast('Leo', 3, 3), wait('Sofia', 3), wait('Vitor', 3), wait('Nina', 3),
-      play('Priscila', 4, 4), wait('Caio', 4), wait('Daniel', 4)];
+      play('Priscila', 4, 4), wait('Caio', 4), wait('Daniel', 4),
+      play('Helena', 5, 9), wait('Otávio', 5)];
   }
   function mStart(s, at) {
     const w = M.t.filter(t => t.station === s && t.status === 'waiting').sort(mOrder)[0];
@@ -43,7 +45,7 @@ const FILA = (() => {
   }
   function mTick() {
     const n = Date.now();
-    for (let s = 1; s <= 4; s++) {
+    for (let s = 1; s <= NST; s++) {
       const P = M.t.find(t => t.station === s && t.status === 'playing');
       if (P && ms(P.ends_at) <= n) { P.status = 'done'; mStart(s, Math.max(ms(P.ends_at) + cfg.gap_sec * 1000, n)); }
       else if (!P) mStart(s, n + cfg.gap_sec * 1000);
@@ -102,10 +104,10 @@ const FILA = (() => {
   const api = {
     MOCK, now, init, demoFind: name => (M.t.find(t => t.name === name) || {}).id, get cfg() { return cfg; },
     async me(id) { return sync(MOCK ? mMe(id) : await rpc('fila_me', { p_id: id })); },
-    async join(name) { if (MOCK) { if (M.t.some(t => ['waiting', 'playing'].includes(t.status) && norm(t.name) === norm(name))) return { error: 'nome_repetido' }; const d = device(); const sts = [1, 2, 3, 4].map(s => mStation(s, false)); const best = sts.sort((a, b) => a.wait_new_s - b.wait_new_s)[0].station;
+    async join(name) { if (MOCK) { if (M.t.some(t => ['waiting', 'playing'].includes(t.status) && norm(t.name) === norm(name))) return { error: 'nome_repetido' }; const d = device(); const sts = STS.map(s => mStation(s, false)); const best = sts.sort((a, b) => a.wait_new_s - b.wait_new_s)[0].station;
         const t = { id: 'm' + Math.random().toString(36).slice(2, 9), name: name.slice(0, 30), station: best, status: 'waiting', fast: false, fast_at: null, jumped_from: null, extra_min: 0, queue_seq: ++M.q, starts_at: null, ends_at: null, device: d }; M.t.push(t); mTick(); return mMe(t.id); }
       return sync(await rpc('fila_join', { p_name: name, p_device: device() })); },
-    async board() { return sync(MOCK ? { now: mIso(Date.now()), config: cfg, stations: [1, 2, 3, 4].map(s => mStation(s, false)) } : await rpc('fila_board')); },
+    async board() { return sync(MOCK ? { now: mIso(Date.now()), config: cfg, stations: STS.map(s => mStation(s, false)) } : await rpc('fila_board')); },
     async staffView(station, pin) { return MOCK ? (mTick(), { ok: true, now: mIso(Date.now()), config: cfg, station: mStation(station, true) }) : sync(await rpc('fila_staff_view', { p_station: station, p_pin: pin })); },
     async staffDo(action, station, pin, o = {}) { return MOCK ? mDo(action, station, o) : rpc('fila_staff_do', { p_action: action, p_station: station, p_pin: pin, p_ticket: o.ticket || null, p_name: o.name || null, p_fast: !!o.fast }); },
     tick() { if (MOCK) mTick(); else rpc('fila_tick').catch(() => {}); },

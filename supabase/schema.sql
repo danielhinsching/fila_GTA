@@ -18,7 +18,7 @@ create table if not exists fila_config (
 insert into fila_config default values on conflict do nothing;
 
 create table if not exists fila_secrets (
-  station int primary key check (station between 1 and 4),
+  station int primary key check (station between 1 and 5),
   pin text not null
 );
 
@@ -30,10 +30,11 @@ create table if not exists fila_pin_guard (
 
 create sequence if not exists fila_qseq;
 
+
 create table if not exists fila_tickets (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(name) between 1 and 30),
-  station int not null check (station between 1 and 4),
+  station int not null check (station between 1 and 5),
   status text not null default 'waiting' check (status in ('waiting','playing','done','removed')),
   fast boolean not null default false,
   fast_at timestamptz,
@@ -71,6 +72,13 @@ revoke all on fila_secrets, fila_pin_guard, fila_tickets from anon, authenticate
 revoke insert, update, delete on fila_config, fila_pulse from anon, authenticated;
 
 -- avisa as telas abertas que algo mudou (sem expor dados)
+
+-- 5ª estação: atualiza as constraints de bancos criados com 4 estações
+alter table fila_secrets drop constraint if exists fila_secrets_station_check;
+alter table fila_secrets add constraint fila_secrets_station_check check (station between 1 and 5);
+alter table fila_tickets drop constraint if exists fila_tickets_station_check;
+alter table fila_tickets add constraint fila_tickets_station_check check (station between 1 and 5);
+
 create or replace function fila_bump() returns trigger language plpgsql security definer set search_path = public as $$
 begin update fila_pulse set n = n + 1 where id = 1; return null; end $$;
 drop trigger if exists fila_tickets_bump on fila_tickets;
@@ -156,7 +164,7 @@ declare s int; chain timestamptz; cfg fila_config;
 begin
   perform pg_advisory_xact_lock(777);
   select * into cfg from fila_config;
-  for s in 1..4 loop
+  for s in 1..5 loop
     select ends_at into chain from fila_tickets where station = s and status = 'playing' and ends_at <= now() limit 1;
     if chain is not null then
       update fila_tickets set status = 'done' where station = s and status = 'playing' and ends_at <= now();
@@ -209,7 +217,7 @@ begin
   select * into r from fila_tickets where status in ('waiting','playing') and fila_norm(name) = fila_norm(p_name) limit 1;
   if r.id is not null then return jsonb_build_object('error', 'nome_repetido'); end if;   -- mesmo nome já ativo (outro aparelho/navegador)
   select * into cfg from fila_config;
-  for s in 1..4 loop
+  for s in 1..5 loop
     select coalesce((select greatest(extract(epoch from ends_at - now()),0) from fila_tickets where station = s and status = 'playing' limit 1),0)
          + (select count(*) from fila_tickets where station = s and status in ('waiting','playing')) * cfg.gap_sec
          + (select count(*) from fila_tickets where station = s and status = 'waiting') * cfg.game_min * 60
@@ -225,7 +233,7 @@ end $$;
 create or replace function fila_board() returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object('now', now(), 'config', fila_config_json(),
-    'stations', jsonb_build_array(fila_station_json(1,false), fila_station_json(2,false), fila_station_json(3,false), fila_station_json(4,false)))
+    'stations', jsonb_build_array(fila_station_json(1,false), fila_station_json(2,false), fila_station_json(3,false), fila_station_json(4,false), fila_station_json(5,false)))
 $$;
 
 -- ---------------------------------------------------------------- staff
@@ -233,7 +241,7 @@ create or replace function fila_staff_view(p_station int, p_pin text) returns js
 language plpgsql security definer set search_path = public as $$
 declare st text;
 begin
-  if p_station not between 1 and 4 then return jsonb_build_object('ok', false, 'error', 'estacao'); end if;
+  if p_station not between 1 and 5 then return jsonb_build_object('ok', false, 'error', 'estacao'); end if;
   st := fila_pin_state(p_station, p_pin);
   if st <> 'ok' then return jsonb_build_object('ok', false, 'error', st); end if;
   return jsonb_build_object('ok', true, 'now', now(), 'config', fila_config_json(), 'station', fila_station_json(p_station, true));
@@ -244,7 +252,7 @@ create or replace function fila_staff_do(p_action text, p_station int, p_pin tex
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare st text; t fila_tickets; cfg fila_config; n int; w int; rk int;
 begin
-  if p_station not between 1 and 4 then return jsonb_build_object('ok', false, 'error', 'estacao'); end if;
+  if p_station not between 1 and 5 then return jsonb_build_object('ok', false, 'error', 'estacao'); end if;
   st := fila_pin_state(p_station, p_pin);
   if st <> 'ok' then return jsonb_build_object('ok', false, 'error', st); end if;
   perform pg_advisory_xact_lock(777);

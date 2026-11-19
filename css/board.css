@@ -6,7 +6,7 @@ body{background:#06010d}
 .top{display:flex;align-items:center;gap:30px;height:128px}.top .ev{height:128px;filter:drop-shadow(0 0 16px rgba(255,46,154,.6))}
 .top .mid{flex:1;text-align:center}.top .big{font-size:96px;line-height:1;color:#FFE14D;text-shadow:-5px -5px 0 #12041F,5px -5px 0 #12041F,-5px 5px 0 #12041F,5px 5px 0 #12041F,0 12px 0 #FF2E9A}
 .clock{font-size:70px;color:#fff;text-shadow:0 6px 0 #FF2E9A;font-variant-numeric:tabular-nums;min-width:230px;text-align:right}
-.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:16px;height:764px}
+.cols{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;margin-top:16px;height:764px}
 .port .cols{grid-template-columns:repeat(2,1fr);height:1500px}.port .top{flex-wrap:wrap;height:auto;row-gap:14px}.port .top .big{font-size:64px}.port .top .ev{height:110px}.port .parc{order:3;width:100%;justify-content:center}.port .clock{font-size:50px;min-width:150px}
 .col{position:relative;height:100%;overflow:hidden;background:rgba(14,3,26,.93);border:5px solid #ff4fc3;box-shadow:10px 10px 0 rgba(0,0,0,.6),0 0 34px rgba(255,46,154,.35);padding:20px 22px;display:flex;flex-direction:column;min-width:0}
 .col h2{white-space:nowrap;font-size:54px;color:#fff;text-shadow:0 5px 0 #FF2E9A;display:flex;justify-content:space-between;align-items:baseline}
@@ -38,3 +38,11 @@ body{background:#06010d}
 .spons img{width:auto;display:block}
 @keyframes marq{to{transform:translateX(-50%)}}
 .port .spons{left:36px;right:36px;bottom:30px;height:96px}
+
+/* 5 filas: colunas mais estreitas, tipografia ajustada */
+.land .col{padding:16px 16px}.land .col h2{font-size:42px;gap:6px}.land .col h2 small{font-size:17px;letter-spacing:1px}
+.land .lbl{font-size:20px;letter-spacing:4px;margin-top:10px}.land .now{font-size:42px}.land .tm{font-size:96px}
+.land .next{font-size:38px}.land .nexttm{font-size:34px}.land .li{font-size:28px}.land .li b{width:36px}.land .more{font-size:24px}
+.land .waitnew{font-size:22px;padding:6px 8px;letter-spacing:1.5px}
+.port .cols{grid-template-rows:repeat(3,1fr);gap:16px}.port .cols .col:last-child{grid-column:1/-1}
+.port .col .seq,.port .col .list{display:none}.port .col>*{flex-shrink:0}.port .col{padding:14px 18px}.port .col h2{font-size:44px}.port .col h2 small{font-size:20px}.port .lbl{font-size:18px;margin-top:6px}.port .now{font-size:38px}.port .tm{font-size:76px}.port .next{font-size:36px}.port .nexttm{font-size:32px}.port .waitnew{font-size:24px;margin-top:auto!important}.port .prog{height:10px;margin-top:4px}
