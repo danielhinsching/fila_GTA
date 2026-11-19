@@ -46,3 +46,6 @@ body{background:#06010d}
 .land .waitnew{font-size:22px;padding:6px 8px;letter-spacing:1.5px}
 .port .cols{grid-template-rows:repeat(3,1fr);gap:16px}.port .cols .col:last-child{grid-column:1/-1}
 .port .col .seq,.port .col .list{display:none}.port .col>*{flex-shrink:0}.port .col{padding:14px 18px}.port .col h2{font-size:44px}.port .col h2 small{font-size:20px}.port .lbl{font-size:18px;margin-top:6px}.port .now{font-size:38px}.port .tm{font-size:76px}.port .next{font-size:36px}.port .nexttm{font-size:32px}.port .waitnew{font-size:24px;margin-top:auto!important}.port .prog{height:10px;margin-top:4px}
+
+.top .parc{flex:1;justify-content:center;gap:56px}.top .parc img{height:104px}.top .parc .xp{height:56px}.top .parc .g6{height:98px}
+.port .top .parc{flex:none;gap:36px}.port .top .parc img{height:88px}.port .top .parc .xp{height:46px}.port .top .parc .g6{height:84px}.port .top{justify-content:space-between}
