@@ -24,8 +24,8 @@
         : `<div class="lbl">ESTAÇÃO LIVRE</div><div class="now" style="color:#4dffb0">DISPONÍVEL</div>`;
       const nx = W[0];
       const nextB = nx ? `<div class="lbl">PRÓXIMO</div><div class="next ${nx.fast ? 'gold' : ''}">${esc(nx.name)}</div><div class="nexttm">em <span data-t="until:${ms(nx.est_start)}">--:--</span></div>` : `<div class="lbl">PRÓXIMO</div><div class="next" style="color:#ff8fd6">—</div>`;
-      const lst = W.slice(1, 5).map(x => `<div class="li"><b>${x.pos}</b><span class="${x.fast ? 'gold' : ''}">${esc(x.name)}</span></div>`).join('');
-      const more = W.length > 5 ? `<div class="more">+ ${W.length - 5} na fila</div>` : '';
+      const lst = W.slice(1, 4).map(x => `<div class="li"><b>${x.pos}</b><span class="${x.fast ? 'gold' : ''}">${esc(x.name)}</span></div>`).join('');
+      const more = W.length > 4 ? `<div class="more">+ ${W.length - 4} na fila</div>` : '';
       return `<div class="col">${wz}<h2>FILA #${s}<small>${W.length} aguardando</small></h2>${playing}${nextB}<div class="lbl">NA SEQUÊNCIA</div><div class="list">${lst}${more}</div>
         <div class="waitnew">ENTRAR AGORA: ~<span data-t="wait:${ms(st.queue_end)}">--</span> MIN</div></div>`;
     }).join('');
