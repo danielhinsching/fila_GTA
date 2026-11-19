@@ -8,7 +8,7 @@
   function loginView(err) {
     last = '';
     app.innerHTML = `<div class="wrap" style="padding-top:30px"><p class="ttl">PAINEL DO STAFF</p><section class="box"><h3>QUAL ESTAÇÃO?</h3>
-      <div class="row">${[1, 2, 3, 4, 5].map(n => `<button class="btn grow ${n === S ? 'y' : 'd'}" data-st="${n}">#${n}</button>`).join('')}</div>
+      <div class="stpick">${[1, 2, 3, 4, 5].map(n => `<button class="btn grow ${n === S ? 'y' : 'd'}" data-st="${n}">#${n}</button>`).join('')}</div>
       <h3 class="mt">PIN DA ESTAÇÃO</h3><input id="pin" type="tel" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" value="${esc(PIN)}">
       <button id="in" class="btn y block mt">ENTRAR</button><div class="err" role="alert">${esc(err || '')}</div></section></div>`;
     $$('[data-st]').forEach(b => b.onclick = () => { S = +b.dataset.st; PIN = $('#pin').value; loginView(); });
@@ -39,7 +39,7 @@
     if (!authed || !V) return;
     const n = FILA.now(), P = V.playing, W = V.waiting;
     const over = P && ms(P.starts_at) <= n && ms(P.ends_at) <= n, started = P && ms(P.starts_at) <= n;
-    const cur = P ? `<section class="box now ${over ? 'over' : ''}"><div class="bar"><h3>JOGANDO AGORA</h3>${P.extra_min ? `<span class="tag fast">+${P.extra_min} MIN</span>` : ''}</div>
+    const cur = P ? `<section class="box now ${over ? 'over' : ''}"><div class="bar"><h3>JOGANDO AGORA</h3>${P.extra_min ? `<span class="tag fast">INCLUI +${P.extra_min} MIN</span>` : ''}</div>
         <div class="who ${P.fast ? 'gold' : ''}">${esc(P.name)}</div>
         ${over ? '<div class="c"><span class="wastedtag">WASTED</span></div>' : ''}
         ${started ? `<div class="timer" data-t="rem:${ms(P.ends_at)}">--:--</div><div class="pbar"><i data-t="bar:${ms(P.starts_at)}:${ms(P.ends_at)}"></i></div><p class="sub">${over ? 'tempo esgotado · o próximo entra em instantes' : 'tempo restante'}</p>`

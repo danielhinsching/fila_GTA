@@ -16,3 +16,21 @@
 .acts{grid-column:2/4;display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .addform .row{margin-top:12px}.chk{display:flex;align-items:center;gap:10px;font-size:20px;flex:1}.chk input{width:28px;height:28px;accent-color:var(--gold)}
 .empty{padding:14px 0;text-align:center}
+
+/* ---- mobile first: alvos de toque >= 44px, sem quebras feias, nada estoura a largura ---- */
+.stpick{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.stpick .btn{padding:14px 0;font-size:22px;min-height:52px}
+.btn{min-height:44px;touch-action:manipulation}
+.btn.s{min-height:44px;font-size:16px;padding:8px 10px}
+.acts{display:grid;grid-template-columns:1fr 1fr 52px;gap:8px}.acts .btn{width:100%;padding-left:6px;padding-right:6px;white-space:nowrap}
+.chk{white-space:nowrap;font-size:19px}
+.addform .row{flex-wrap:wrap}.addform .row .btn{flex:1 1 140px}
+.tag.fast{background:var(--gold);color:#12041F;font-size:14px;padding:4px 8px;white-space:nowrap}
+.now .row,.now .acts2{gap:8px}
+.now .row .btn{flex:1 1 130px;min-width:0;font-size:17px;line-height:1.1}
+input[type=text],input[type=password],input[type=tel]{font-size:max(16px,24px)}
+@media (max-width:359px){.stitle{font-size:28px}.qname{font-size:22px}.now .timer{font-size:64px}.btn.s{font-size:14px}.acts{grid-template-columns:1fr 1fr 46px}}
+@media (min-width:600px) and (max-width:859px){.swrap{max-width:560px}}
+.qrow>*,.acts{min-width:0}.acts{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 48px}.acts .btn{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.qrow{grid-template-columns:32px minmax(0,1fr) auto}
+.acts{grid-column:1/-1;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr) 48px}.acts .btn{text-overflow:clip;letter-spacing:1px;font-size:15px;padding:8px 4px}
+@media (max-width:359px){.acts .btn{font-size:13px;letter-spacing:0}}
