@@ -1,0 +1,32 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Placas · Fila do GTA VI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><script src="js/vendor/qrcode.js"></script>
+<style>@font-face{font-family:PD;src:url(assets/pricedown.otf)}@page{size:A4;margin:0}*{box-sizing:border-box}
+html,body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pg{width:210mm;height:297mm;margin:auto;background:#12041F url(assets/bg_port.jpg) center/cover;color:#fff;font-family:system-ui,Arial,sans-serif;text-align:center;padding:12mm 14mm;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden}
+.parc{display:flex;gap:10mm;align-items:center;justify-content:center}.parc img{height:15mm;object-fit:contain}.parc .g6{height:19mm}
+.k{font-family:PD,Impact,sans-serif;color:#ffd23f;text-shadow:1.2mm 1.2mm 0 #ff4fc3;line-height:.9;margin:0}
+.big{font-size:34mm;letter-spacing:1mm}.num{font-size:120mm;text-shadow:3mm 3mm 0 #ff4fc3,0 0 12mm rgba(255,79,195,.6)}
+.qr{background:#fff;padding:4mm;border:2mm solid #ff4fc3;box-shadow:3mm 3mm 0 rgba(0,0,0,.6);width:78mm}.qr svg{display:block;width:100%;height:auto}
+.url{font-family:PD,Impact,sans-serif;font-size:8mm;color:#ff8fd6}.sub{font-size:6.2mm;font-weight:700;margin:0}.ev{font-size:4.6mm;font-weight:700;opacity:.9}
+.av{display:grid;gap:3mm;width:100%;text-align:left}.av div{display:flex;gap:5mm;align-items:center;background:rgba(0,0,0,.58);border:.5mm solid #ff4fc3;border-radius:3mm;padding:3mm 5mm;font-size:5mm;line-height:1.25;font-weight:600}
+.av b{font-family:PD,Impact,sans-serif;font-weight:400;color:#ffd23f;font-size:11mm;min-width:12mm;text-align:center;line-height:1}.av span{color:#ff8fd6}
+.ttl{font-size:17mm}.pg.av2{gap:0}.av2 .qr{width:56mm;padding:3mm}</style></head><body><div class="pg" id="pg"></div>
+<script>
+const P=new URLSearchParams(location.search).get('p')||'1',U='https://filagta.vercel.app';
+function qr(){const q=qrcode(0,'M');q.addData(U);q.make();const n=q.getModuleCount();let d='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+=`M${c+4} ${r+4}h1v1h-1z`;
+return `<div class="qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n+8} ${n+8}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#12041F"/></svg></div>`}
+const hd='<div class="parc"><img src="assets/liga.png" alt=""><img class="g6" src="assets/gta6.png" alt=""><img src="assets/superxp.png" alt=""></div>',ev='<div class="ev">Noite de Jogos Vice City · 19/11 · Ágora Uni</div>';
+let h;
+if(P==='avisos'){
+ h=hd+`<h1 class="k ttl">AVISOS GERAIS</h1><div class="av">
+ <div><b>1</b><p style="margin:0">Escaneie o QR code, digite seu nome e entre na fila. O sistema escolhe a estação com menos espera.</p></div>
+ <div><b>2</b><p style="margin:0">Cada jogador tem <span>20 minutos</span>. O staff pode liberar <span>+10 minutos</span>.</p></div>
+ <div><b>3</b><p style="margin:0"><span>Fast-pass</span> (nome dourado): alterna 1 fast-pass, 1 jogador normal.</p></div>
+ <div><b>4</b><p style="margin:0">Quando acabar o tempo, o próximo começa em 30 segundos. Sem tolerância.</p></div>
+ <div><b>5</b><p style="margin:0">Mantenha a <span>tela do celular acesa</span> e o som ligado: avisamos aos 5 e 1 minuto antes da sua vez.</p></div>
+ <div><b>6</b><p style="margin:0">Um nome por pessoa. Dúvidas? Fale com o staff da estação.</p></div></div>`+qr()+`<div class="url">filagta.vercel.app</div>`+ev;
+}else{
+ h=hd+`<div><p class="sub">ESTAÇÃO</p><div class="k num">${P}</div></div>`+qr()+`<div><p class="sub">Escaneie e entre na fila</p><div class="url" style="margin-top:2mm">filagta.vercel.app</div></div>`+ev;
+}
+document.getElementById('pg').innerHTML=h;if(P==='avisos')document.getElementById('pg').classList.add('av2');
+</script></body></html>
