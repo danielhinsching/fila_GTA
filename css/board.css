@@ -49,3 +49,4 @@ body{background:#06010d}
 
 .top .parc{flex:1;justify-content:center;gap:56px}.top .parc img{height:104px}.top .parc .xp{height:56px}.top .parc .g6{height:98px}
 .port .top .parc{flex:none;gap:36px}.port .top .parc img{height:88px}.port .top .parc .xp{height:46px}.port .top .parc .g6{height:84px}.port .top{justify-content:space-between}
+.land .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}.land .top .parc{flex:none;justify-self:center}.land .top .clock{justify-self:end}
