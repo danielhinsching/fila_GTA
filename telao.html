@@ -2,78 +2,13 @@
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Telão · Fila do GTA VI</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/board.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script><script src="lib.js"></script>
-<style>
-html,body{overflow:hidden;height:100%;background:#06010d}
-body{background:#06010d}
-#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;background:linear-gradient(rgba(18,4,31,.5),rgba(18,4,31,.86)),url(assets/bg.jpg) center/cover;padding:34px 56px;letter-spacing:2.5px}
-.top{display:flex;align-items:center;gap:30px;height:150px}
-.top img.ev{height:150px;filter:drop-shadow(0 0 16px rgba(255,46,154,.6))}
-.top .mid2{flex:1;text-align:center}
-.top .big2{font-size:96px;line-height:1;color:#FFE14D;text-shadow:-5px -5px 0 #12041F,5px -5px 0 #12041F,-5px 5px 0 #12041F,5px 5px 0 #12041F,0 12px 0 #FF2E9A}
-.clock{font-size:70px;color:#fff;text-shadow:0 6px 0 #FF2E9A;font-variant-numeric:tabular-nums;min-width:230px;text-align:right}
-.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:22px;height:800px}
-.col{background:rgba(14,3,26,.93);border:5px solid #ff4fc3;box-shadow:10px 10px 0 rgba(0,0,0,.6),0 0 34px rgba(255,46,154,.35);padding:20px 22px;display:flex;flex-direction:column;min-width:0}
-.col{height:800px;overflow:hidden}.col h2{white-space:nowrap;font-size:54px;color:#fff;text-shadow:0 5px 0 #FF2E9A;display:flex;justify-content:space-between;align-items:baseline}
-.col h2 small{font-size:26px;color:#ff8fd6;text-shadow:none}
-.lbl{font-size:24px;color:#ff8fd6;margin-top:12px;letter-spacing:5px}
-.now{font-size:50px;line-height:1.05;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
-.tm{font-size:104px;line-height:1;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 7px 0 #FF2E9A}
-.tm.warn{color:#FFE14D}.tm.crit{color:#ff4d6d;animation:pulse .8s infinite}
-.prog{height:14px;background:#3a1457;margin-top:8px}.prog i{display:block;height:100%;background:linear-gradient(90deg,#FF2E9A,#FFE14D)}
-.next{font-size:46px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nexttm{font-size:42px;color:#FFE14D;font-variant-numeric:tabular-nums}
-.list{margin-top:6px;flex:1;overflow:hidden}
-.li{font-size:32px;display:flex;gap:12px;padding:1px 0;white-space:nowrap}.li b{font-weight:400;color:#FFE14D;width:46px}.li span{overflow:hidden;text-overflow:ellipsis}
-.more{font-size:28px;color:#ff8fd6;margin-top:2px}
-.foot{position:absolute;bottom:20px;left:56px;right:56px;display:flex;justify-content:space-between;font-size:34px;color:#ffe9f8}
-.waitnew{margin-top:auto!important;white-space:nowrap;font-size:29px;background:#FFE14D;color:#12041F;padding:6px 14px;margin-top:10px;text-align:center}
-.calling{animation:flash 1s infinite;color:#FFE14D}
-</style></head><body>
-<div id="stage">
- <div class="top"><img class="ev" src="assets/logo.png" alt=""><div class="mid2"><div class="big2">FILA DO GTA VI</div></div><div class="clock" id="clk">--:--</div></div>
- <div class="cols" id="cols"></div>
- <div class="foot"><span>Escaneie o QR code da parede para entrar na fila</span><span class="gold">⚡ NOME DOURADO = FAST-PASS</span></div>
+<script src="js/config.js"></script><script src="js/format.js"></script><script src="js/api.js"></script><script src="js/analytics.js"></script>
+</head><body>
+<div id="stage" class="land">
+  <div class="top"><img src="assets/logo.png" alt=""><div class="mid"><div class="big">FILA DO GTA VI</div></div><div class="clock" id="clk">--:--</div></div>
+  <div class="cols" id="cols"></div>
+  <div class="foot"><span>Escaneie o QR code da parede para entrar na fila</span><span class="gold">⚡ NOME DOURADO = FAST-PASS</span></div>
 </div>
-<script>
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const stage = document.getElementById('stage'), cols = document.getElementById('cols');
-function fit() { const k = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `scale(${k})`; }
-addEventListener('resize', fit); fit();
-let last = '';
-function render() {
-  const now = FILA.now(), game = FILA.cfg.game_min * 60000;
-  const html = [1, 2, 3, 4].map(n => {
-    const st = FILA.station(n), P = st.P, W = st.W;
-    const started = P && FILA.ms(P.starts_at) <= now;
-    const playing = P ? (started
-      ? `<div class="lbl">JOGANDO</div><div class="now ${P.fast ? 'gold' : ''}">${esc(P.name)}</div><div class="tm" data-t="rem:${FILA.ms(P.ends_at)}">--:--</div><div class="prog"><i data-t="bar:${FILA.ms(P.starts_at)}:${FILA.ms(P.ends_at)}" style="width:0"></i></div>`
-      : `<div class="lbl calling">CHAMANDO</div><div class="now ${P.fast ? 'gold' : ''}">${esc(P.name)}</div><div class="tm warn" data-t="until:${FILA.ms(P.starts_at)}">--:--</div>`)
-      : `<div class="lbl">ESTAÇÃO LIVRE</div><div class="now" style="color:#4dffb0">DISPONÍVEL</div>`;
-    const nx = st.slots[0];
-    const nextBlock = nx ? `<div class="lbl">PRÓXIMO</div><div class="next ${nx.t.fast ? 'gold' : ''}">${esc(nx.t.name)}</div><div class="nexttm">em <span data-t="until:${Math.round(nx.start)}">--:--</span></div>` : `<div class="lbl">PRÓXIMO</div><div class="next" style="color:#ff8fd6">—</div>`;
-    const lst = st.slots.slice(1, 5).map((x, i) => `<div class="li"><b>${i + 2}</b><span class="${x.t.fast ? 'gold' : ''}">${esc(x.t.name)}</span></div>`).join('');
-    const more = st.slots.length > 5 ? `<div class="more">+ ${st.slots.length - 5} na fila</div>` : '';
-    return `<div class="col"><h2>FILA #${n}<small>${W.length} aguardando</small></h2>${playing}${nextBlock}<div class="lbl">NA SEQUÊNCIA</div><div class="list">${lst}${more}</div>
-      <div class="waitnew">ENTRAR AGORA: ~<span data-t="wait:${st.queueEnd}">--</span> MIN</div></div>`;
-  }).join('');
-  if (html !== last) { cols.innerHTML = html; last = html; }
-  tick2();
-}
-function tick2() {
-  const now = FILA.now(), d = new Date();
-  document.getElementById('clk').textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-  document.querySelectorAll('[data-t]').forEach(el => {
-    const p = el.dataset.t.split(':'), k = p[0], v = +p[1];
-    if (k === 'rem') { const r = v - now; el.textContent = FILA.mmss(r); el.classList.toggle('crit', r <= 60000); el.classList.toggle('warn', r > 60000 && r <= 300000); }
-    else if (k === 'until') el.textContent = FILA.mmss((v > 1e12 ? v : v) - now);
-    else if (k === 'wait') el.textContent = FILA.mins(v - now);
-    else if (k === 'bar') { const s = v, e = +p[2]; el.style.width = Math.max(0, Math.min(100, (now - s) / (e - s) * 100)) + '%'; }
-  });
-}
-(async () => {
-  await FILA.init(); FILA.sub(render); setInterval(render, 500); setInterval(FILA.tick, 3000); render();
-})();
-</script></body></html>
+<script src="js/board.js"></script></body></html>

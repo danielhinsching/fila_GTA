@@ -1,0 +1,28 @@
+/* Tela do jogador (mobile-first) */
+.hero{animation:rise .4s both}
+.rules{display:grid;gap:8px;margin-top:16px;font-size:17px;color:var(--soft)}.rules div{display:flex;gap:10px;align-items:center}.rules b{font-weight:400;color:var(--yel);font-size:22px;width:30px;text-align:center}
+.who{font-size:clamp(34px,10vw,48px);text-align:center;color:#fff;text-shadow:0 5px 0 var(--pink);margin:10px 0 2px;word-break:break-word}
+.badges{text-align:center;margin:6px 0 4px}
+/* placa neon da fila */
+.sign{margin:14px auto 0;max-width:300px;text-align:center;border:4px solid var(--frame);background:rgba(14,3,26,.9);padding:6px 0 10px;box-shadow:0 0 0 3px #12041F,0 0 26px rgba(255,46,154,.55),inset 0 0 22px rgba(255,46,154,.25)}
+.sign small{display:block;font-size:20px;letter-spacing:8px;color:var(--soft)}.sign b{display:block;font-weight:400;font-size:84px;line-height:.95;color:#fff;text-shadow:0 0 12px var(--pink),0 0 26px var(--pink)}
+.card{animation:rise .35s both}
+.bignum{font-size:clamp(84px,26vw,120px);line-height:1;text-align:center;color:var(--yel);text-shadow:-3px -3px 0 #12041F,3px -3px 0 #12041F,-3px 3px 0 #12041F,3px 3px 0 #12041F,0 8px 0 var(--pink);margin:6px 0}
+.dots{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0 4px}
+.dot{width:16px;height:16px;border-radius:50%;background:#3a1457;border:2px solid var(--frame)}
+.dot.play{background:var(--ok);border-color:var(--ok)}.dot.me{width:24px;height:24px;background:var(--yel);border-color:#fff;box-shadow:0 0 16px var(--yel)}
+.dotmore{font-size:16px;color:var(--soft);align-self:center}
+.near{border-color:var(--yel);animation:flash 1.6s infinite}
+.near .nearmsg{font-size:30px;text-align:center;color:var(--yel);margin-top:8px}
+.etabig{font-size:clamp(54px,17vw,84px);line-height:1}
+.chip{display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;color:var(--soft);text-align:center;margin-top:12px}
+.chip .ok{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}.chip .off{width:10px;height:10px;border-radius:50%;background:var(--bad)}
+/* jogando */
+.ringwrap{position:relative;width:min(78vw,300px);aspect-ratio:1;margin:12px auto 4px}
+.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:#3a1457;stroke-width:14}.ring-fg{fill:none;stroke:var(--pink);stroke-width:14;stroke-linecap:round;transition:stroke .4s;filter:drop-shadow(0 0 8px var(--pink))}
+.ring-fg.warn{stroke:var(--yel);filter:drop-shadow(0 0 8px var(--yel))}.ring-fg.crit{stroke:var(--bad);filter:drop-shadow(0 0 10px var(--bad))}
+.ringtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ringtxt .timer{font-size:clamp(56px,18vw,84px)}.ringtxt small{font-size:18px;color:var(--soft);margin-top:6px}
+.go .gobig{font-size:clamp(46px,14vw,70px);text-align:center;line-height:1;margin:6px 0}
+@media (min-width:700px){.wrap{max-width:620px}}

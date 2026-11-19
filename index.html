@@ -1,126 +1,16 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12041F">
 <title>Fila do GTA VI · Noite de Jogos</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/player.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script><script src="lib.js"></script>
-</head><body><div class="wrap">
-<div class="hdr"><img src="assets/liga.png" alt="Liga Ágora"><div class="sep"></div><img src="assets/agora.png" alt="Ágora Tech Park"></div>
-<img class="logo" src="assets/logo.png" alt="Noite de Jogos Vice City">
-<div id="app"></div>
+<script src="js/config.js"></script><script src="js/format.js"></script><script src="js/api.js"></script><script src="js/alerts.js"></script><script src="js/analytics.js"></script>
+</head><body>
+<div class="wrap">
+  <div class="hdr"><img src="assets/liga.png" alt="Liga Ágora"><div class="sep"></div><img src="assets/agora.png" alt="Ágora Tech Park"></div>
+  <img id="logo" class="logo" src="assets/logo.png" alt="Noite de Jogos Vice City">
+  <main id="app" aria-live="polite"></main>
 </div>
-<script>
-const KEY = 'fila_ticket_v1';
-const $ = s => document.querySelector(s);
-const app = $('#app');
-let myId = null, prev = {}, fired = {}, soundOn = false, fin = false;
-try { myId = localStorage.getItem(KEY); fired = JSON.parse(localStorage.getItem('fila_fired') || '{}'); } catch (e) {}
-const saveFired = () => { try { localStorage.setItem('fila_fired', JSON.stringify(fired)); } catch (e) {} };
-const once = k => { if (fired[k]) return false; fired[k] = 1; saveFired(); return true; };
-function toast(msg, gold) { const d = document.createElement('div'); d.className = 'toast' + (gold ? ' gold' : ''); d.textContent = msg; document.body.appendChild(d); setTimeout(() => d.remove(), 6000); }
-
-function joinView() {
-  app.innerHTML = `
-  <div class="box"><h3>ENTRE NA FILA DO GTA VI</h3>
-    <input id="nm" type="text" maxlength="30" placeholder="SEU NOME" autocomplete="given-name">
-    <button id="go" class="btn y block mt">ENTRAR NA FILA</button>
-    <div class="err" id="err"></div>
-    <p class="sub small">Cada jogador tem 20 minutos. Deixe esta tela aberta: vamos avisar quando for a sua vez.</p>
-  </div>`;
-  const go = async () => {
-    const name = $('#nm').value.trim(); if (!name) { $('#err').textContent = 'Informe seu nome'; return; }
-    ALERT.unlock(); soundOn = true; $('#go').disabled = true; $('#err').textContent = '';
-    try { const t = await FILA.rpc('fila_join', { p_name: name }); myId = t.id; try { localStorage.setItem(KEY, myId); } catch (e) {} await FILA.refresh(); render(); }
-    catch (e) { $('#err').textContent = 'Não foi possível entrar. Tente de novo.'; $('#go').disabled = false; }
-  };
-  $('#go').onclick = go; $('#nm').onkeydown = e => { if (e.key === 'Enter') go(); };
-}
-
-function finishedView(msg) {
-  fin = true;
-  app.innerHTML = `<div class="box"><h3>OBRIGADO POR JOGAR!</h3><p class="mid">${msg}</p>
-  <button id="again" class="btn y block mt">ENTRAR NA FILA DE NOVO</button></div>`;
-  $('#again').onclick = () => { fin = false; myId = null; try { localStorage.removeItem(KEY); } catch (e) {} prev = {}; joinView(); };
-}
-
-let missing = 0;
-async function render() {
-  if (!myId || fin) return;
-  const f = FILA.find(myId);
-  if (!f) {                                     // fora das listas ativas: finalizado, removido, ou ainda sincronizando
-    const t = await FILA.getTicket(myId);
-    if (t && (t.status === 'waiting' || t.status === 'playing')) return;
-    if (!t) { if (++missing < 3) return; return finishedView('Não encontramos seu ticket.'); }
-    return finishedView(t.status === 'done' ? 'Seu tempo acabou. Esperamos que tenha sido épico!' : 'Seu ticket foi removido pelo staff.');
-  }
-  missing = 0;
-  const { t, st, pos, ahead, startsAt } = f, now = FILA.now(), gold = t.fast;
-  const nameCls = gold ? 'gold' : '';
-  const soundBtn = (!soundOn || !ALERT.ready) ? `<button id="snd" class="btn g block mt">🔔 TOQUE PARA ATIVAR OS ALERTAS</button>` : '';
-  let body = '';
-
-  if (t.status === 'playing') {
-    const started = startsAt <= now, end = FILA.ms(t.ends_at), rem = end - now;
-    if (!started) {
-      body = `<div class="box" style="border-color:#FFE14D"><h3>É A SUA VEZ!</h3><p class="mid">Vá para a</p><div class="big">ESTAÇÃO #${t.station}</div>
-        <p class="mid mt">Começa em</p><div class="timer warn">${FILA.mmss(startsAt - now)}</div></div>`;
-    } else {
-      const cls = rem <= 60000 ? 'crit' : rem <= 300000 ? 'warn' : '';
-      body = `<div class="box"><h3>VOCÊ ESTÁ JOGANDO · ESTAÇÃO #${t.station}</h3><div class="timer ${cls}">${FILA.mmss(rem)}</div>
-        <p class="sub mt">tempo restante${t.extra_min ? ' (inclui +' + t.extra_min + ' min)' : ''}</p>
-        <p class="sub small">Quer mais ${FILA.cfg.extend_min} minutos? Fale com o staff da sua estação.</p></div>`;
-    }
-  } else {
-    const p = st.P, pRem = p ? FILA.ms(p.ends_at) - now : 0, wait = startsAt - now;
-    const near = pos === 1;
-    body = `<div class="box" ${near ? 'style="border-color:#FFE14D"' : ''}>
-      <div class="c"><span class="tag">FILA #${t.station}</span>${gold ? ' <span class="tag" style="background:var(--gold)">⚡ FAST-PASS</span>' : ''}</div>
-      <p class="mid mt">Sua posição</p><div class="big">${pos}º</div>
-      <p class="sub mt">${ahead === 0 ? 'Você é o próximo!' : ahead === 1 ? 'Falta 1 pessoa na sua frente' : 'Faltam ' + ahead + ' pessoas na sua frente'}</p>
-      ${near ? `<p class="mid mt gold">FIQUE POR PERTO!</p>` : ''}</div>
-    <div class="box"><h3>SUA VEZ COMEÇA EM</h3><div class="timer ${near && wait <= 300000 ? 'warn' : ''}">${FILA.mmss(wait)}</div>
-      <p class="sub mt">por volta das ${FILA.clock(startsAt)}</p>
-      ${p ? `<p class="sub small">Jogando agora na estação #${t.station}: ${esc(p.name)} (${FILA.mmss(pRem)} restantes)</p>` : ''}</div>`;
-  }
-  const html = `<p class="ttl" style="font-size:44px;margin:8px 0 0;${gold ? '' : 'color:#fff;text-shadow:0 5px 0 #FF2E9A'}"><span class="${nameCls}">${esc(t.name)}</span></p>${body}${soundBtn}`;
-  if (html !== app._h) { app.innerHTML = html; app._h = html; }
-  const sb = $('#snd'); if (sb) sb.onpointerdown = () => { ALERT.unlock(); soundOn = true; ALERT.beep(1); setTimeout(render, 50); };
-  alerts(f, now);
-}
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-function alerts(f, now) {
-  const { t, st, pos } = f, id = t.id, p = prev;
-  if (p.status === 'waiting' && t.status === 'playing') {
-    if (once(id + ':turn')) ALERT.show('É A SUA VEZ!', 'Vá agora para a ESTAÇÃO #' + t.station + '. Seu jogo começa em instantes.', 'go', 5);
-  }
-  if (t.status === 'waiting') {
-    if (p.pos && pos < p.pos && pos === 1 && once(id + ':next:' + t.queue_seq)) ALERT.show('VOCÊ É O PRÓXIMO!', 'Fique por perto da estação #' + t.station + '.', 'warn', 3);
-    if (p.pos && pos > p.pos) toast('Sua posição mudou: ' + p.pos + 'º → ' + pos + 'º (fast-pass passou na frente)');
-    if (p.pos && pos < p.pos && pos > 1) toast('Você avançou: ' + p.pos + 'º → ' + pos + 'º');
-    if (p.fast === false && t.fast) toast('⚡ Fast-pass ativado! Você passou para a frente da fila.', true);
-    // aviso de tempo restante do jogador atual para quem é o próximo
-    if (pos === 1 && st.P && FILA.ms(st.P.starts_at) <= now) {
-      const rem = FILA.ms(st.P.ends_at) - now, k = st.P.ends_at;
-      if (rem <= 60000) { if (once(id + ':n60:' + k)) { fired[id + ':n300:' + k] = 1; ALERT.show('FALTA 1 MINUTO!', 'Vá para a estação #' + t.station + ': o jogador atual termina em 1 minuto.', 'go', 4); } }
-      else if (rem <= 300000 && once(id + ':n300:' + k)) ALERT.show('FALTAM 5 MINUTOS', 'Você joga em seguida na estação #' + t.station + '. Vá chegando!', 'warn', 3);
-    }
-  } else if (t.status === 'playing' && FILA.ms(t.starts_at) <= now) {
-    const rem = FILA.ms(t.ends_at) - now, k = t.ends_at;
-    if (rem <= 60000) { if (once(id + ':p60:' + k)) { fired[id + ':p300:' + k] = 1; ALERT.show('FALTA 1 MINUTO!', 'Seu tempo está acabando. Se quiser mais ' + FILA.cfg.extend_min + ' min, chame o staff agora.', 'go', 4); } }
-    else if (rem <= 300000 && once(id + ':p300:' + k)) ALERT.show('FALTAM 5 MINUTOS', 'Aproveite o tempo que resta!', 'warn', 3);
-  }
-  prev = { status: t.status, pos, fast: t.fast };
-}
-
-(async () => {
-  await FILA.init();
-  if (myId) render(); else joinView();
-  FILA.sub(() => { if (myId) render(); });
-  setInterval(() => { if (myId) render(); }, 500);
-  // se ninguém do staff estiver com tela aberta, o tempo ainda precisa avançar
-  setInterval(() => { const late = FILA.tickets.some(t => t.status === 'playing' && FILA.now() - FILA.ms(t.ends_at) > 8000); if (late) setTimeout(FILA.tick, Math.random() * 4000); }, 5000);
-  if (FILA.MOCK && !myId) { /* demo: assume um ticket para visualizar */ const q = new URLSearchParams(location.search).get('as'); if (q) { const t = FILA.tickets.find(x => x.name === q); if (t) { myId = t.id; render(); } } }
-})();
-</script></body></html>
+<script src="js/player.js"></script>
+</body></html>
