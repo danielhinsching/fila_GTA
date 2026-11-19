@@ -28,18 +28,12 @@
     : `<button id="snd" class="btn g block mt">🔔 TOQUE PARA ATIVAR OS ALERTAS</button>`;
   const offChip = () => offline ? `<div class="chip"><i class="off"></i>Sem conexão · tentando reconectar…</div>` : '';
 
-  function dots(ahead, hasPlayer) {
-    const shown = Math.min(ahead, 7); let h = '';
-    if (ahead > shown) h += `<span class="dotmore">+${ahead - shown}</span>`;
-    for (let i = 0; i < shown; i++) h += `<i class="dot ${i === 0 && hasPlayer && ahead <= 7 ? 'play' : ''}"></i>`;
-    return `<div class="dots" aria-hidden="true">${h}<i class="dot me"></i></div><div class="legend">${hasPlayer ? '<span><i class="dot play"></i>jogando</span>' : ''}${ahead > (hasPlayer ? 1 : 0) ? '<span><i class="dot"></i>esperando</span>' : ''}<span><i class="dot me sm"></i>você</span></div>`;
-  }
   const head = t => `<h2 class="who ${t.fast ? 'gold' : ''}">${esc(t.name)}</h2><div class="badges">${t.fast ? '<span class="tag fast">⚡ FAST-PASS</span>' : ''}</div>`;
 
   const VIEWS = {
     wait: (t, r) => `${head(t)}
       <div class="sign"><small>FILA</small><b>#${t.station}</b></div>
-      <section class="box card ${r.pos === 1 ? 'near' : ''}"><h3 class="c">SUA POSIÇÃO</h3><div class="bignum">${r.pos}º</div>${dots(r.ahead, !!r.current_ends_at)}
+      <section class="box card ${r.pos === 1 ? 'near' : ''}"><h3 class="c">SUA POSIÇÃO</h3><div class="bignum">${r.pos}º</div>
         <p class="sub">${r.ahead === 0 ? 'Você é o próximo!' : r.ahead === 1 ? 'Falta 1 pessoa na sua frente' : `Faltam ${r.ahead} pessoas na sua frente`}</p>
         ${r.pos === 1 ? '<p class="nearmsg">FIQUE POR PERTO!</p>' : ''}</section>
       <section class="box card"><h3 class="c">PREVISÃO PARA JOGAR</h3><div class="timer etabig" data-t="eta:${ms(r.est_start)}">--</div>
