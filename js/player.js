@@ -12,6 +12,7 @@
     app.innerHTML = `<section class="box hero"><h3>ENTRE NA FILA DO GTA VI</h3>
       <input id="nm" type="text" maxlength="30" placeholder="SEU NOME" autocomplete="given-name" autocapitalize="words" enterkeyhint="go">
       <button id="go" class="btn y block mt">ENTRAR NA FILA</button><div class="err" id="err" role="alert"></div>
+      <div class="chip" id="wt" style="display:none;margin-top:12px"></div>
       <div class="rules"><div><b>1</b>Você entra em uma das 5 filas, escolhida pelo sistema.</div>
         <div><b>2</b>Cada jogador tem ${FILA.cfg.game_min} minutos no console.</div>
         <div><b>3</b>Deixe esta tela aberta: avisamos quando for a sua vez.</div></div></section>`;
@@ -21,6 +22,8 @@
       try { R = await FILA.join(name); if (R.error === 'nome_repetido') { $('#err').textContent = 'Já tem alguém com esse nome na fila. Se for você, abra pelo mesmo navegador; se for outra pessoa, use nome e sobrenome.'; $('#go').disabled = false; return; } if (!R.ticket) throw 0; myId = R.ticket.id; try { localStorage.setItem(KEY, myId); } catch (e) {} fin = false; missing = 0; render(); }
       catch (e) { $('#err').textContent = 'Não foi possível entrar. Verifique a internet e tente de novo.'; $('#go').disabled = false; }
     };
+    FILA.board().then(b => { const w = Math.min(...b.stations.map(x => x.wait_new_s)), m = Math.ceil(w / 60), el = $('#wt'); if (!el) return;
+      el.style.display = ''; el.innerHTML = m <= 1 ? '<i class="ok"></i>Vez rápida: sem espera agora' : `<i class="${m > 90 ? 'off' : 'ok'}"></i>Espera estimada hoje: ~${m >= 60 ? Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0') : m + ' min'}${m > 90 ? ' · você pode voltar mais tarde' : ''}`; }).catch(() => {});
     $('#go').onclick = go; $('#nm').onkeydown = e => { if (e.key === 'Enter') go(); };
   }
   const soundChip = () => (soundOn && ALERT.ready)

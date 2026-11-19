@@ -1,0 +1,9 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico · Fila</title><link rel="stylesheet" href="css/base.css">
+<style>body{padding:16px;font-family:system-ui,sans-serif}.w{max-width:640px;margin:auto}h1{font-size:22px}.r{padding:8px 10px;margin:6px 0;border-radius:8px;background:#1d0a30;font-size:15px;overflow-wrap:anywhere}.ok{border-left:6px solid #3ddc84}.bad{border-left:6px solid #ff4d4d}.wr{border-left:6px solid #ffd23f}button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;background:#ffd23f;font-weight:700;margin:6px 4px 6px 0}input{font-size:18px;padding:10px;width:90px;border-radius:8px;border:0}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script><script src="js/format.js"></script><script src="js/api.js"></script></head>
+<body><div class="w"><h1>Diagnóstico da fila</h1>
+<p>Testa o banco real. Informe os 5 PINs separados por vírgula, na ordem das estações 1 a 5 (opcional, testa o painel do staff). Cria e remove um jogador de teste.</p>
+<input id="pin" inputmode="numeric" style="width:100%;box-sizing:border-box" placeholder="1111,2222,3333,4444,5555"><br> <button id="run">RODAR TESTE</button><div id="out"></div></div>
+<script src="js/diag.js"></script></body></html>
