@@ -5,7 +5,7 @@ const FILA = (() => {
   const C = window.FILA_CONFIG || {};
   const Q = new URLSearchParams(location.search);
   const MOCK = Q.has('mock') || !C.SUPABASE_URL;
-  let sb = null, offset = 0, cfg = { game_min: 20, extend_min: 10, gap_sec: 30, fast_every: 2 };
+  let sb = null, offset = 0, cfg = { game_min: 20, extend_min: 10, gap_sec: 30, fast_every: 1 };
   const now = () => Date.now() + offset;
   const sync = r => { if (r && r.now) offset = Date.parse(r.now) - Date.now(); if (r && r.config) cfg = r.config; return r; };
 
@@ -34,7 +34,7 @@ const FILA = (() => {
     const w = M.t.filter(t => t.station === s && t.status === 'waiting');
     const N = w.filter(t => !t.fast).sort((a, b) => a.queue_seq - b.queue_seq), F = w.filter(t => t.fast).sort((a, b) => ms(a.fast_at) - ms(b.fast_at) || a.queue_seq - b.queue_seq);
     let run = M.run[s] || 0; const out = [];
-    while (N.length || F.length) { if (F.length && (run >= (cfg.fast_every || 2) || !N.length)) { out.push(F.shift()); run = 0; } else { out.push(N.shift()); run++; } }
+    while (N.length || F.length) { if (F.length && (run >= (cfg.fast_every || 1) || !N.length)) { out.push(F.shift()); run = 0; } else { out.push(N.shift()); run++; } }
     return out;
   };
   const norm = x => String(x || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');

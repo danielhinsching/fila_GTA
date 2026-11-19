@@ -46,7 +46,8 @@ create table if not exists fila_tickets (
   ends_at timestamptz
 );
 alter table fila_tickets add column if not exists device text;
-alter table fila_config add column if not exists fast_every int not null default 2;   -- a cada N normais, 1 fast-pass
+alter table fila_config add column if not exists fast_every int not null default 1;   -- a cada N normais, 1 fast-pass (1 = intercalado: normal, fast, normal, fast...)
+update fila_config set fast_every = 1 where fast_every = 2;   -- regra atual: 1 fast para 1 normal
 create table if not exists fila_station_run (station int primary key, run int not null default 0);   -- normais que começaram desde o último fast-pass
 alter table fila_station_run enable row level security;
 -- Uma única sessão de staff por estação: quem abre primeiro segura; outro aparelho só entra após 40 s sem sinal ou depois do "Sair".
@@ -118,7 +119,7 @@ returns table (id uuid, pos int)
 language plpgsql stable security definer set search_path = public as $$
 declare n uuid[]; f uuid[]; ni int := 1; fi int := 1; run int; ev int; p int := 0; take_fast boolean;
 begin
-  select coalesce(fast_every, 2) into ev from fila_config limit 1;
+  select coalesce(fast_every, 1) into ev from fila_config limit 1;
   select coalesce((select r.run from fila_station_run r where r.station = p_station), 0) into run;
   select coalesce(array_agg(t.id order by t.queue_seq), '{}') into n from fila_tickets t where t.station = p_station and t.status = 'waiting' and not t.fast;
   select coalesce(array_agg(t.id order by t.fast_at nulls last, t.queue_seq), '{}') into f from fila_tickets t where t.station = p_station and t.status = 'waiting' and t.fast;
