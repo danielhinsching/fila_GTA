@@ -42,6 +42,6 @@ As tabelas são privadas (RLS sem acesso anônimo). O navegador só chama funç�
 
 ## Regras
 
-20 min por jogador · +10 min pelo staff · fast-pass alterna 1 a 1 com os normais (nome dourado, posição original registrada) ·
+10 min por jogador · +10 min pelo staff · fast-pass alterna 1 a 1 com os normais (nome dourado, posição original registrada) ·
 próximo começa 30 s após o anterior · alertas de 5 e 1 min para quem joga e para o #2 · tela **WASTED** quando o tempo acaba.
 Alertas exigem a tela aberta (sem notificação com tela bloqueada).

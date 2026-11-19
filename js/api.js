@@ -5,7 +5,7 @@ const FILA = (() => {
   const C = window.FILA_CONFIG || {};
   const Q = new URLSearchParams(location.search);
   const MOCK = Q.has('mock') || !C.SUPABASE_URL;
-  let sb = null, offset = 0, cfg = { game_min: 20, extend_min: 10, gap_sec: 30, fast_every: 1 };
+  let sb = null, offset = 0, cfg = { game_min: 10, extend_min: 10, gap_sec: 30, fast_every: 1 };
   const now = () => Date.now() + offset;
   const sync = r => { if (r && r.now) offset = Date.parse(r.now) - Date.now(); if (r && r.config) cfg = r.config; return r; };
 
@@ -42,7 +42,7 @@ const FILA = (() => {
   function mSeed() {
     const n = Date.now(), m = 60000;
     const mk = (name, st, status, o = {}) => ({ id: 'm' + Math.random().toString(36).slice(2, 9), name, station: st, status, fast: false, fast_at: null, jumped_from: null, extra_min: 0, queue_seq: ++M.q, starts_at: null, ends_at: null, device: null, ...o });
-    const play = (name, st, startedMin, extra = 0) => mk(name, st, 'playing', { starts_at: mIso(n - startedMin * m), ends_at: mIso(n + (20 + extra - startedMin) * m), extra_min: extra });
+    const play = (name, st, startedMin, extra = 0) => mk(name, st, 'playing', { starts_at: mIso(n - startedMin * m), ends_at: mIso(n + (10 + extra - startedMin) * m), extra_min: extra });
     const wait = (name, st, o = {}) => mk(name, st, 'waiting', o);
     const fast = (name, st, from) => wait(name, st, { fast: true, fast_at: mIso(n - 3 * m), jumped_from: from });
     M.t = [
@@ -108,7 +108,7 @@ const FILA = (() => {
   async function init() {
     if (MOCK) {
       mSeed();
-      if (Q.has('wasted')) { const r = M.t.find(t => t.name === (Q.get('as') || 'Renato')); if (r && r.status === 'playing') { r.starts_at = mIso(Date.now() - 20 * 60000 + 2000); r.ends_at = mIso(Date.now() + 2000); } }
+      if (Q.has('wasted')) { const r = M.t.find(t => t.name === (Q.get('as') || 'Renato')); if (r && r.status === 'playing') { r.starts_at = mIso(Date.now() - 10 * 60000 + 2000); r.ends_at = mIso(Date.now() + 2000); } }
       setInterval(mTick, 2000); return;
     }
     sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_KEY, { auth: { persistSession: false } });

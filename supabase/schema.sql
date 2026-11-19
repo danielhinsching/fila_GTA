@@ -11,7 +11,7 @@
 -- ---------------------------------------------------------------- tabelas
 create table if not exists fila_config (
   id int primary key default 1 check (id = 1),
-  game_min int not null default 20,
+  game_min int not null default 10,
   extend_min int not null default 10,
   gap_sec int not null default 30
 );
@@ -47,7 +47,8 @@ create table if not exists fila_tickets (
 );
 alter table fila_tickets add column if not exists device text;
 alter table fila_config add column if not exists fast_every int not null default 1;   -- a cada N normais, 1 fast-pass (1 = intercalado: normal, fast, normal, fast...)
-update fila_config set fast_every = 1 where fast_every = 2;   -- regra atual: 1 fast para 1 normal
+update fila_config set fast_every = 1 where fast_every = 2;
+update fila_config set game_min = 10 where game_min = 20;   -- tempo padrão por jogador: 10 min
 create table if not exists fila_station_run (station int primary key, run int not null default 0);   -- normais que começaram desde o último fast-pass
 alter table fila_station_run enable row level security;
 -- Uma única sessão de staff por estação: quem abre primeiro segura; outro aparelho só entra após 40 s sem sinal ou depois do "Sair".

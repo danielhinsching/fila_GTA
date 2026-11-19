@@ -7,7 +7,7 @@
     add(FILA.MOCK ? null : true, FILA.MOCK ? 'Modo demo (mock): não é o banco real' : 'Modo banco real');
     let cfg;
     await step('Conexão e hora do servidor', async () => { await FILA.init(); const t0 = Date.now(); await FILA.now(); return { ok: true, note: 'latência ' + (Date.now() - t0) + ' ms' }; });
-    await step('Configuração', async () => { cfg = FILA.cfg; return { ok: cfg && cfg.game_min === 20, note: JSON.stringify(cfg) }; });
+    await step('Configuração', async () => { cfg = FILA.cfg; return { ok: cfg && cfg.game_min === 10, note: JSON.stringify(cfg) }; });
     await step('fast_every = 1 (alterna 1:1)', async () => ({ ok: cfg && cfg.fast_every === 1, note: 'valor atual ' + (cfg && cfg.fast_every) + (cfg && cfg.fast_every !== 1 ? ' → rode: update fila_config set fast_every = 1;' : '') }));
     await step('Telão: 5 estações', async () => { const b = await FILA.board(); return { ok: b.stations.length === 5, note: b.stations.length + ' estações' }; });
     let me;

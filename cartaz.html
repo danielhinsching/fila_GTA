@@ -13,7 +13,7 @@ h1{font-family:PD,Impact,sans-serif;font-size:21mm;line-height:.95;margin:0;colo
 <div class="pg"><div class="parc"><img src="assets/liga.png" alt=""><img class="g6" src="assets/gta6.png" alt=""><img src="assets/superxp.png" alt=""></div>
 <div><h1>ENTRE NA FILA<br>DO GTA VI</h1><p class="sub" style="margin-top:4mm">Aponte a câmera do celular para o QR code</p></div>
 <div class="qr"><div id="qr"></div></div><div class="url" id="u"></div>
-<div class="st"><div><b>1</b>Escaneie e digite seu nome</div><div><b>2</b>Você joga 20 min. O staff pode dar +10 min</div><div><b>3</b>Mantenha a tela acesa: avisamos a sua vez</div></div>
+<div class="st"><div><b>1</b>Escaneie e digite seu nome</div><div><b>2</b>Você joga 10 min. O staff pode dar +10 min</div><div><b>3</b>Mantenha a tela acesa: avisamos a sua vez</div></div>
 <div class="ev">Noite de Jogos Vice City · 19/11 · Ágora Uni</div></div>
 <script>const u=new URLSearchParams(location.search).get('u')||'https://filagta.vercel.app';document.getElementById('u').textContent=u.replace('https://','');
 const q=qrcode(0,'M');q.addData(u);q.make();const n=q.getModuleCount();let d='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+=`M${c+4} ${r+4}h1v1h-1z`;
