@@ -32,7 +32,7 @@
     const shown = Math.min(ahead, 7); let h = '';
     if (ahead > shown) h += `<span class="dotmore">+${ahead - shown}</span>`;
     for (let i = 0; i < shown; i++) h += `<i class="dot ${i === 0 && hasPlayer && ahead <= 7 ? 'play' : ''}"></i>`;
-    return `<div class="dots" aria-hidden="true">${h}<i class="dot me"></i></div>`;
+    return `<div class="dots" aria-hidden="true">${h}<i class="dot me"></i></div><div class="legend">${hasPlayer ? '<span><i class="dot play"></i>jogando</span>' : ''}${ahead > (hasPlayer ? 1 : 0) ? '<span><i class="dot"></i>esperando</span>' : ''}<span><i class="dot me sm"></i>você</span></div>`;
   }
   const head = t => `<h2 class="who ${t.fast ? 'gold' : ''}">${esc(t.name)}</h2><div class="badges">${t.fast ? '<span class="tag fast">⚡ FAST-PASS</span>' : ''}</div>`;
 

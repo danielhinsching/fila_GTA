@@ -26,3 +26,5 @@
 .ringtxt .timer{font-size:clamp(56px,18vw,84px)}.ringtxt small{font-size:18px;color:var(--soft);margin-top:6px}
 .go .gobig{font-size:clamp(46px,14vw,70px);text-align:center;line-height:1;margin:6px 0}
 @media (min-width:700px){.wrap{max-width:620px}}
+
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:15px;color:var(--soft);margin:2px 0 6px}.legend span{display:inline-flex;align-items:center;gap:6px}.legend .dot{width:12px;height:12px}.legend .dot.me.sm{width:14px;height:14px;box-shadow:0 0 8px var(--yel)}
