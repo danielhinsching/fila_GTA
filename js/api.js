@@ -5,7 +5,7 @@ const FILA = (() => {
   const C = window.FILA_CONFIG || {};
   const Q = new URLSearchParams(location.search);
   const MOCK = Q.has('mock') || !C.SUPABASE_URL;
-  let sb = null, offset = 0, cfg = { game_min: 20, extend_min: 10, gap_sec: 30 };
+  let sb = null, offset = 0, cfg = { game_min: 20, extend_min: 10, gap_sec: 30, fast_every: 2 };
   const now = () => Date.now() + offset;
   const sync = r => { if (r && r.now) offset = Date.parse(r.now) - Date.now(); if (r && r.config) cfg = r.config; return r; };
 
@@ -22,8 +22,15 @@ const FILA = (() => {
 
   // ---------------------------------------------------------------- demo (mesmas regras do SQL)
   const NST = 5, STS = [1, 2, 3, 4, 5];
-  const M = { t: [], q: 0 };
-  const mOrder = (a, b) => (b.fast - a.fast) || (ms(a.fast_at) - ms(b.fast_at)) || (a.queue_seq - b.queue_seq);
+  const M = { t: [], q: 0, run: {} };
+  // Mesma regra do SQL: a cada cfg.fast_every normais começa 1 fast-pass; sem normais, os fast seguem em sequência.
+  const mWaiting = s => {
+    const w = M.t.filter(t => t.station === s && t.status === 'waiting');
+    const N = w.filter(t => !t.fast).sort((a, b) => a.queue_seq - b.queue_seq), F = w.filter(t => t.fast).sort((a, b) => ms(a.fast_at) - ms(b.fast_at) || a.queue_seq - b.queue_seq);
+    let run = M.run[s] || 0; const out = [];
+    while (N.length || F.length) { if (F.length && (run >= (cfg.fast_every || 2) || !N.length)) { out.push(F.shift()); run = 0; } else { out.push(N.shift()); run++; } }
+    return out;
+  };
   const norm = x => String(x || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');
   const mIso = x => new Date(x).toISOString();
   function mSeed() {
@@ -40,8 +47,8 @@ const FILA = (() => {
       play('Helena', 5, 9), wait('Otávio', 5)];
   }
   function mStart(s, at) {
-    const w = M.t.filter(t => t.station === s && t.status === 'waiting').sort(mOrder)[0];
-    if (w) { w.status = 'playing'; w.starts_at = mIso(at); w.ends_at = mIso(at + cfg.game_min * 60000); }
+    const w = mWaiting(s)[0];
+    if (w) { M.run[s] = w.fast ? 0 : (M.run[s] || 0) + 1; w.status = 'playing'; w.starts_at = mIso(at); w.ends_at = mIso(at + cfg.game_min * 60000); }
   }
   function mTick() {
     const n = Date.now();
@@ -53,7 +60,7 @@ const FILA = (() => {
   }
   function mStation(s, ids) {
     const n = Date.now(), P = M.t.find(t => t.station === s && t.status === 'playing');
-    const W = M.t.filter(t => t.station === s && t.status === 'waiting').sort(mOrder), base = P ? ms(P.ends_at) : n;
+    const W = mWaiting(s), base = P ? ms(P.ends_at) : n;
     const slot = i => base + ((i + 1) * cfg.gap_sec + i * cfg.game_min * 60) * 1000;
     const qend = slot(W.length);
     return { station: s,

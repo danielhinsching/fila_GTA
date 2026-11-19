@@ -46,6 +46,9 @@ create table if not exists fila_tickets (
   ends_at timestamptz
 );
 alter table fila_tickets add column if not exists device text;
+alter table fila_config add column if not exists fast_every int not null default 2;   -- a cada N normais, 1 fast-pass
+create table if not exists fila_station_run (station int primary key, run int not null default 0);   -- normais que começaram desde o último fast-pass
+alter table fila_station_run enable row level security;
 create index if not exists fila_tickets_station_status on fila_tickets (station, status);
 create index if not exists fila_tickets_device on fila_tickets (device) where status in ('waiting','playing');
 
@@ -68,7 +71,7 @@ drop policy if exists fila_config_read on fila_config;
 create policy fila_config_read on fila_config for select using (true);
 drop policy if exists fila_pulse_read on fila_pulse;
 create policy fila_pulse_read on fila_pulse for select using (true);
-revoke all on fila_secrets, fila_pin_guard, fila_tickets from anon, authenticated;
+revoke all on fila_secrets, fila_pin_guard, fila_tickets, fila_station_run from anon, authenticated;
 revoke insert, update, delete on fila_config, fila_pulse from anon, authenticated;
 
 -- avisa as telas abertas que algo mudou (sem expor dados)
@@ -106,14 +109,33 @@ begin
   return 'bad';
 end $$;
 
+-- Ordem real da fila: a cada fast_every normais começa 1 fast-pass (se houver); sem normais, os fast seguem em sequência.
+create or replace function fila_order(p_station int)
+returns table (id uuid, pos int)
+language plpgsql stable security definer set search_path = public as $$
+declare n uuid[]; f uuid[]; ni int := 1; fi int := 1; run int; ev int; p int := 0; take_fast boolean;
+begin
+  select coalesce(fast_every, 2) into ev from fila_config limit 1;
+  select coalesce((select r.run from fila_station_run r where r.station = p_station), 0) into run;
+  select coalesce(array_agg(t.id order by t.queue_seq), '{}') into n from fila_tickets t where t.station = p_station and t.status = 'waiting' and not t.fast;
+  select coalesce(array_agg(t.id order by t.fast_at nulls last, t.queue_seq), '{}') into f from fila_tickets t where t.station = p_station and t.status = 'waiting' and t.fast;
+  while ni <= coalesce(array_length(n, 1), 0) or fi <= coalesce(array_length(f, 1), 0) loop
+    take_fast := fi <= coalesce(array_length(f, 1), 0) and (run >= ev or ni > coalesce(array_length(n, 1), 0));
+    p := p + 1;
+    if take_fast then id := f[fi]; fi := fi + 1; run := 0; else id := n[ni]; ni := ni + 1; run := run + 1; end if;
+    pos := p; return next;
+  end loop;
+end $$;
+
 create or replace function fila_start_next(p_station int, p_start timestamptz) returns void
 language plpgsql security definer set search_path = public as $$
 declare t uuid; cfg fila_config;
 begin
   select * into cfg from fila_config;
-  select id into t from fila_tickets where station = p_station and status = 'waiting'
-   order by fast desc, fast_at asc nulls last, queue_seq asc limit 1;
+  select o.id into t from fila_order(p_station) o where o.pos = 1;
   if t is not null then
+    insert into fila_station_run (station, run) values (p_station, case when (select fast from fila_tickets where id = t) then 0 else 1 end)
+      on conflict (station) do update set run = case when (select fast from fila_tickets where id = t) then 0 else fila_station_run.run + 1 end;
     update fila_tickets set status = 'playing', starts_at = p_start,
            ends_at = p_start + make_interval(mins => cfg.game_min) where id = t;
   end if;
@@ -125,8 +147,7 @@ returns table (id uuid, pos int, est_start timestamptz)
 language sql stable security definer set search_path = public as $$
   with cfg as (select * from fila_config limit 1),
   base as (select coalesce((select ends_at from fila_tickets where station = p_station and status = 'playing' limit 1), now()) as b),
-  w as (select t.id, row_number() over (order by t.fast desc, t.fast_at asc nulls last, t.queue_seq asc)::int as pos
-          from fila_tickets t where t.station = p_station and t.status = 'waiting')
+  w as (select o.id, o.pos from fila_order(p_station) o)
   select w.id, w.pos,
          base.b + (w.pos * cfg.gap_sec + (w.pos - 1) * cfg.game_min * 60) * interval '1 second'
     from w, base, cfg
@@ -154,7 +175,7 @@ begin
 end $$;
 
 create or replace function fila_config_json() returns jsonb language sql stable security definer set search_path = public as $$
-  select jsonb_build_object('game_min', game_min, 'extend_min', extend_min, 'gap_sec', gap_sec) from fila_config limit 1
+  select jsonb_build_object('game_min', game_min, 'extend_min', extend_min, 'gap_sec', gap_sec, 'fast_every', fast_every) from fila_config limit 1
 $$;
 
 -- Idempotente: qualquer tela aberta chama; vira o relógio da fila.

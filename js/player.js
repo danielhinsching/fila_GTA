@@ -88,7 +88,7 @@
       if (p.view === 'wait' && p.pos) {
         if (R.pos > p.pos) toast(`Sua posição mudou: ${p.pos}º → ${R.pos}º`, 'gold');
         else if (R.pos < p.pos && R.pos > 1) toast(`Você avançou: ${p.pos}º → ${R.pos}º`);
-        if (!p.fast && t.fast) toast('⚡ Fast-pass ativado! Você passou para a frente da fila.', 'gold');
+        if (!p.fast && t.fast) toast('⚡ Fast-pass ativado! Você entra a cada 2 jogadores da fila.', 'gold');
       }
       if (R.pos === 1 && p.pos > 1 && once(id + ':next:' + t.id + R.pos + ':' + (p.pos))) ALERT.show('VOCÊ É O PRÓXIMO!', 'Fique por perto da estação #' + t.station + '.', 'warn', 3);
       if (R.pos === 1 && R.current_ends_at && ms(R.current_starts_at) <= n) {

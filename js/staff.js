@@ -48,7 +48,7 @@
         <div class="row mt"><button class="btn d s grow" data-a="finish">ENCERRAR AGORA</button><button class="btn d s grow" data-a="absent" data-id="${P.id}">AUSENTE → FIM</button></div></section>`
       : `<section class="box now c"><h3>ESTAÇÃO LIVRE</h3><p class="sub">Ninguém jogando. O próximo da fila começa sozinho.</p></section>`;
     const rows = W.map(w => `<div class="qrow"><div class="qpos">${w.pos}</div>
-        <div class="qname ${w.fast ? 'gold' : ''}">${esc(w.name)}${w.fast && w.jumped_from ? `<div class="jump">⚡ estava em ${w.jumped_from}º · passou para a frente</div>` : ''}</div>
+        <div class="qname ${w.fast ? 'gold' : ''}">${esc(w.name)}${w.fast && w.jumped_from ? `<div class="jump">⚡ estava em ${w.jumped_from}º · fast-pass</div>` : ''}</div>
         <div class="qeta">${clock(ms(w.est_start))}<br>em <span data-t="eta:${ms(w.est_start)}">--</span> min</div>
         <div class="acts">${w.fast ? `<button class="btn s d" data-a="unfast" data-id="${w.id}">DESFAZER ⚡</button>` : `<button class="btn s g" data-a="fast" data-id="${w.id}">⚡ FAST-PASS</button>`}
           <button class="btn s d" data-a="absent" data-id="${w.id}">→ FIM</button><button class="btn s r" data-a="remove" data-id="${w.id}">✕</button></div></div>`).join('');
