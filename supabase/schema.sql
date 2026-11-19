@@ -189,6 +189,11 @@ begin
     'current_starts_at', pl.starts_at, 'current_ends_at', pl.ends_at);
 end $$;
 
+-- Normaliza nome para comparar: minúsculas, sem acento, sem espaço/pontuação ("João  S." = "joao s")
+create or replace function fila_norm(t text) returns text language sql immutable as $$
+  select regexp_replace(translate(lower(coalesce(t,'')), 'áàâãäéèêëíìîïóòôõöúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn'), '[^a-z0-9]', '', 'g')
+$$;
+
 create or replace function fila_join(p_name text, p_device text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare s int; best int; bestload numeric; load numeric; cfg fila_config; r fila_tickets;
@@ -201,6 +206,8 @@ begin
     select * into r from fila_tickets where device = p_device and status in ('waiting','playing') limit 1;
     if r.id is not null then return fila_me(r.id); end if;
   end if;
+  select * into r from fila_tickets where status in ('waiting','playing') and fila_norm(name) = fila_norm(p_name) limit 1;
+  if r.id is not null then return jsonb_build_object('error', 'nome_repetido'); end if;   -- mesmo nome já ativo (outro aparelho/navegador)
   select * into cfg from fila_config;
   for s in 1..4 loop
     select coalesce((select greatest(extract(epoch from ends_at - now()),0) from fila_tickets where station = s and status = 'playing' limit 1),0)

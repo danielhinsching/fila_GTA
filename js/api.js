@@ -23,6 +23,7 @@ const FILA = (() => {
   // ---------------------------------------------------------------- demo (mesmas regras do SQL)
   const M = { t: [], q: 0 };
   const mOrder = (a, b) => (b.fast - a.fast) || (ms(a.fast_at) - ms(b.fast_at)) || (a.queue_seq - b.queue_seq);
+  const norm = x => String(x || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');
   const mIso = x => new Date(x).toISOString();
   function mSeed() {
     const n = Date.now(), m = 60000;
@@ -101,7 +102,7 @@ const FILA = (() => {
   const api = {
     MOCK, now, init, demoFind: name => (M.t.find(t => t.name === name) || {}).id, get cfg() { return cfg; },
     async me(id) { return sync(MOCK ? mMe(id) : await rpc('fila_me', { p_id: id })); },
-    async join(name) { if (MOCK) { const d = device(); const sts = [1, 2, 3, 4].map(s => mStation(s, false)); const best = sts.sort((a, b) => a.wait_new_s - b.wait_new_s)[0].station;
+    async join(name) { if (MOCK) { if (M.t.some(t => ['waiting', 'playing'].includes(t.status) && norm(t.name) === norm(name))) return { error: 'nome_repetido' }; const d = device(); const sts = [1, 2, 3, 4].map(s => mStation(s, false)); const best = sts.sort((a, b) => a.wait_new_s - b.wait_new_s)[0].station;
         const t = { id: 'm' + Math.random().toString(36).slice(2, 9), name: name.slice(0, 30), station: best, status: 'waiting', fast: false, fast_at: null, jumped_from: null, extra_min: 0, queue_seq: ++M.q, starts_at: null, ends_at: null, device: d }; M.t.push(t); mTick(); return mMe(t.id); }
       return sync(await rpc('fila_join', { p_name: name, p_device: device() })); },
     async board() { return sync(MOCK ? { now: mIso(Date.now()), config: cfg, stations: [1, 2, 3, 4].map(s => mStation(s, false)) } : await rpc('fila_board')); },

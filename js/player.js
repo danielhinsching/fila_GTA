@@ -18,7 +18,7 @@
     const go = async () => {
       const name = $('#nm').value.trim(); if (!name) { $('#err').textContent = 'Digite seu nome'; return; }
       ALERT.unlock(); soundOn = true; $('#go').disabled = true; $('#err').textContent = '';
-      try { R = await FILA.join(name); if (!R.ticket) throw 0; myId = R.ticket.id; try { localStorage.setItem(KEY, myId); } catch (e) {} fin = false; missing = 0; render(); }
+      try { R = await FILA.join(name); if (R.error === 'nome_repetido') { $('#err').textContent = 'Já tem alguém com esse nome na fila. Se for você, abra pelo mesmo navegador; se for outra pessoa, use nome e sobrenome.'; $('#go').disabled = false; return; } if (!R.ticket) throw 0; myId = R.ticket.id; try { localStorage.setItem(KEY, myId); } catch (e) {} fin = false; missing = 0; render(); }
       catch (e) { $('#err').textContent = 'Não foi possível entrar. Verifique a internet e tente de novo.'; $('#go').disabled = false; }
     };
     $('#go').onclick = go; $('#nm').onkeydown = e => { if (e.key === 'Enter') go(); };
