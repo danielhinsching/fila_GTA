@@ -50,3 +50,6 @@ body{background:#06010d}
 .top .parc{flex:1;justify-content:center;gap:56px}.top .parc img{height:104px}.top .parc .xp{height:56px}.top .parc .g6{height:98px}
 .port .top .parc{flex:none;gap:36px}.port .top .parc img{height:88px}.port .top .parc .xp{height:46px}.port .top .parc .g6{height:84px}.port .top{justify-content:space-between}
 .land .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}.land .top .parc{flex:none;justify-self:center}.land .top .clock{justify-self:end}
+
+#fs{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:10px;padding:14px 20px;border:2px solid #ff4fc3;border-radius:12px;background:rgba(18,4,31,.85);color:#fff;font:700 16px system-ui,Arial,sans-serif;letter-spacing:1px;cursor:pointer}
+#fs:hover,#fs:focus-visible{background:#ff4fc3;outline:none}#fs[hidden]{display:none}#fs svg{width:20px;height:20px}
